@@ -1,0 +1,610 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2018/03/10
+%
+\documentclass[runningheads]{article}
+
+\usepackage[margin=3cm]{geometry}
+\usepackage[T1]{fontenc}
+\def\doi#1{\href{https://doi.org/\detokenize{#1}}{\url{https://doi.org/\detokenize{#1}}}}
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+%
+\usepackage{listings}
+\lstset{language=Pascal}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[capbesideposition=outside,capbesidesep=quad]{floatrow}
+\usepackage{wrapfig}
+\usepackage{fancybox}
+%\newcommand{\CR}{\keys{\return}}
+\newcommand{\CR}{{\tiny$\hookleftarrow$}}
+\usepackage{listings}
+\lstset{
+  language=bash,
+  basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue}
+}
+\usepackage{menukeys}
+\usepackage{tikz,lipsum,lmodern}
+\usepackage[most]{tcolorbox}
+
+\newcounter{dummy} 
+\numberwithin{dummy}{subsection}
+\newtheorem{mytheorem}[dummy]{Theorem}
+\newcommand{\frage}[1]{{{\color{blue}[\sf#1]}}}
+\newcommand{\pesa}[1]{\frage{PS:#1}}
+\newcommand{\dosc}[1]{\frage{DS:{\color{orange}#1}}}
+%\rnewcommand{\frage}[1]{}
+\newcommand{\pmin}{p_{\min}}
+\newcommand{\pmax}{p_{\max}}
+\newcommand{\Oh}[1]{\mathcal{O}(#1)}
+\newcommand{\gilt}{\,:\,}
+
+%\setlength{\textfloatsep}{5pt}
+
+\setlength{\parindent}{0pt}
+
+
+
+\begin{document}
+
+\begin{center}
+\huge Decentralized Online Scheduling\\Of Malleable NP-hard Jobs\\[0.4cm]
+\Large Euro-Par 2022 Software Artifact Overview Document\\[0.4cm]
+\large Peter Sanders and Dominik Schreiber
+\end{center}
+
+
+%
+%\title{Decentralized Online Scheduling\\Of Malleable NP-hard Jobs}
+%\author{\textbf{Software Artifact Overview Document}\\\ \\[0.3cm]
+%Peter Sanders\orcidID{0000-0003-3330-9349} \and
+%Dominik Schreiber\orcidID{0000-0002-4185-1851}}
+%
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+%\institute{Karlsruhe Institute of Technology, 76131 Karlsruhe, Germany
+%\email{\{sanders,dominik.schreiber\}@kit.edu}%\\
+%\url{http://www.springer.com/gp/computer-science/lncs} \and
+%ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+%\email{\{abc,lncs\}@uni-heidelberg.de}
+%}
+%
+%\maketitle              % typeset the header of the contribution
+%
+%
+%
+%
+
+\newenvironment{ttfenv}{\par\vspace{0.2cm}\ttfamily}{\par\vspace{0.2cm}}
+\newenvironment{ttfenvcompact}{\par\ttfamily}{\par}
+
+\vspace{0.3cm}
+
+This document serves as a documentation on the software artifact associated with our Euro-Par 2022 publication (named as above).
+In particular, we describe how to build and run our scheduling platform Mallob and how to reproduce our experiments.
+As our research was conducted on a large configuration (1536--6144 cores) of a commodity cluster with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame where applicable.
+As such, we expect that our experiments can be simulated on a much smaller scale with similar qualitative results.
+
+\section{Getting Started}
+
+We now describe how to to build and initialize our scheduling platform named Mallob.
+Throughout the document, we assume basic familiarity with the command-line interface of Linux (specifically \texttt{bash}).
+
+\subsection{Prerequisites}
+\label{sec:prerequisites}
+
+As a point of reference, installing the following packages (including required dependencies) is sufficient to build and execute Mallob on an Ubuntu 20.04 clean base image of Docker:
+
+\begin{ttfenv}
+sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils \CR\\
+build-essential cmake wget libjemalloc-dev libjemalloc2 gdb
+\end{ttfenv}
+
+If jemalloc is not available on your machine and you have no installation rights, you can execute
+
+\begin{ttfenv}
+( cd lib \&\& bash fetch\_and\_build\_jemalloc.sh )
+\end{ttfenv}
+
+and explicitly point to its directory while building Mallob (see below).
+
+We use PyPlot / Matplotlib for outputting plots from experiments.
+In order to produce plots from our experiments via the scripts we provide, you require Python 3 and a functional Matplotlib installation.
+It should suffice to install the following package with its required dependencies:
+
+\begin{ttfenv}
+sudo apt install python3-matplotlib
+\end{ttfenv}
+
+
+
+\subsection{Building Mallob}
+
+Mallob is a C++17 application linked with MPI. Only Linux on \texttt{x86\_64} architectures is supported.
+%Its requirements are:
+%\begin{itemize}
+% \item A C/C++ compiler suite (we use GCC 9) and CMake;
+% \item An MPI installation including developer resources (we used Intel MPI 2019, but OpenMPI works as well);
+% \item GDB (for properly reporting errors at execution time);
+% \item jemalloc (optional, for scalable memory allocation).
+%\end{itemize}
+
+To build Mallob, follow these steps from the base directory of this artifact:
+\begin{enumerate}
+ \item Fetch and build all external SAT solvers which are included in Mallob:\\
+ \texttt{( cd lib \&\& bash fetch\_and\_build\_solvers.sh )}
+ \item Create a build directory:\ \ \ \texttt{mkdir -p build; cd build}
+ \item Generate build files with CMake:
+ \begin{ttfenv}
+ CC=\$(which mpicc) CXX=\$(which mpicxx) cmake -DCMAKE\_BUILD\_TYPE=RELEASE \CR\\
+ -DMALLOB\_USE\_JEMALLOC=1 -DMALLOB\_LOG\_VERBOSITY=4 -DMALLOB\_ASSERT=1 ..
+ \end{ttfenv}
+ If using a local installation (see Section~\ref{sec:prerequisites}), additionally set:\\
+ \texttt{-DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib}\\
+ Alternatively, if no jemalloc implementation is present, you can instead set\\
+ \texttt{-DMALLOB\_USE\_JEMALLOC=0} which builds Mallob with the default \texttt{malloc} implementation.
+ \item Build Mallob:\ \ \ \texttt{make; cd ..}
+\end{enumerate}
+
+\subsubsection{Build without Internet Access}
+
+You might need to build Mallob on a platform without direct internet access, as was the case for the cluster we used.
+We have set up a temporary SSH file system (SSHFS) which mounts a user directory of the cluster at our own machine.
+(Please refer to the documentation of your cluster for more information.)
+
+On your machine with internet access, download and extract the artifact to the mounted directory and fetch the SAT solvers and (if desired) jemalloc by executing \texttt{fetch\_sat\_solvers.sh} and \texttt{fetch\_jemalloc.sh} from the \texttt{lib/} subdirectory.
+After these steps, follow the usual build procedure on the cluster (calling again \texttt{fetch\_and\_build\_...} where you previously only called \texttt{fetch\_...}).
+
+\subsection{Fetch Benchmarks}
+
+In our experiments, we use benchmarks from the International SAT Competition 2020.
+You can fetch them with the following command:
+\begin{ttfenv}
+( cd instances \&\& bash fetch\_sat2020\_instances.sh )
+\end{ttfenv}
+Please consider that all instances together take about 33$\,$GiB of disk space.
+
+\subsection{Test Run}
+
+All Mallob runs are run from the base directory of Mallob (i.e., the executable is at \texttt{./build/mallob}).
+Make sure that \texttt{./reports/} and \texttt{./templates/} are valid paths as well.
+To test that everything functions correctly, perform this basic ``sanity check'' for your Mallob environment:
+
+\begin{ttfenv}
+PATH=build:\$PATH RDMAV\_FORK\_SAFE=1 mpirun -np 4 build/mallob -T=60 \CR\\
+-mono=instances/r3unknown\_100k.cnf
+\end{ttfenv}
+
+This should process a single SAT formula with four MPI processes (i.e., four workers) for 60 seconds and then exit unsuccessfully. (Exiting with a solution would be a very lucky outcome in this case.)
+
+
+
+
+
+
+
+
+\section{Instructions for Experiments}
+
+In the following, we explain how each of our experiments needs to be set up and how results can be retrieved.
+For each set of experiments, we provide two different sets of instructions: How to run our original experiments (``Original Setup''), and how to run a shorter suite of experiments on a single machine (``Small Setup'').
+We first describe these two setups in general and then explain how each of our evaluation sections can be reproduced with both setups.
+
+We provide highlighted boxes at the beginning of each subsection which feature the quick and easy commands to execute for running the experiments and showing the results.
+The instructions below the boxes offer more detailed instructions on how to set up, run, and analyze the experiments oneself.
+
+\subsection{Original Setup}
+
+For documentation purposes, we describe the exact setup we have used for our experiments.
+We used up to 128 ``thin'' compute nodes of SuperMUC-ng\footnote{https://doku.lrz.de/display/PUBLIC/Hardware+of+SuperMUC-NG}.
+Each node consists of two Intel Xeon Platinum 8174 processors with 24 physical cores (48 hardware threads) each.
+Each node features a total of 96\,GB of RAM.
+To quote the official documentation of SuperMUC-ng: ``\textit{The internal interconnect is a fast OmniPath network with 100 Gbit/s.
+The compute nodes are bundled into 8 domains (islands). Within one island, the OmniPath network topology is a `fat tree' for highly efficient communication. The OmniPath connection between the islands is pruned (pruning factor 1:4).}''\footnote{https://doku.lrz.de/display/PUBLIC/SuperMUC-NG}
+
+In addition to the base installation on SuperMUC-ng, we have loaded the following modules (for building as well as execution):
+{
+\begin{verbatim}
+1) admin/1.0     5) intel/19.0.5      9) gcc/9.3.0           
+2) tempdir/1.0   6) intel-mkl/2019   10) intel-mpi/2019-gcc  
+3) lrz/1.0       7) lrztools/2.0     11) cmake/3.14.5        
+4) spack/21.1.1  8) slurm_setup/1.0  12) gdb/9.1    
+\end{verbatim}
+}
+
+SuperMUC-ng runs the SLURM workload manager, which is a centralized scheduling system.
+Jobs in SLURM are described via a script file with special \textit{SLURM directives} which describe the kind of deployment, the scale, maximum processing time, and other meta data.
+Jobs are then submitted to SLURM via the command \texttt{sbatch \$file}.
+We provide SLURM script files equivalent to the ones we have used to submit our jobs.
+However, depending on the system available to you, \textbf{it is likely that you need to modify these files} -- please consult the documentation for your compute cluster.
+
+We used commit \texttt{a316fb6f4dee55d2d3aa0a61686043f4d7836086} from the \texttt{interface} branch of Mallob\footnote{https://github.com/domschrei/mallob} (the same repository state we also include in this artifact).
+
+\subsection{Small Setup}
+\label{sec:small-setup}
+
+If you intend to run Mallob on a single shared-memory machine with interactive access, you can call \texttt{mpirun} or \texttt{mpiexec} directly instead of the above procedure involving SLURM.
+The SLURM directives we use roughly correspond to the following \texttt{mpirun} command when using OpenMPI:
+
+\begin{ttfenv}
+ mpirun -np \$numprocesses --map-by numa:PE=4 --bind-to core \$command
+\end{ttfenv}
+
+This setup should assign four physical cores (eight hardware threads) to each MPI process.
+For some experiments you may want to increase the number of MPI processes in order to observe more fine-grained scheduling: In that case, use the directive \texttt{numa:PE=1} instead and set the program option \texttt{-t=1} in Mallob.
+As such you can quadruple the number of MPI processes while giving each solver process only one instead of four cores.
+This tweak is generally possible for all of our experiments, at the price of worse performance in terms of job processing.
+
+Two environment variables must be set for Mallob: \texttt{PATH=build:\$PATH}, which assures that the solver sub-process can be executed, and \texttt{RDMAV\_FORK\_SAFE=1}, which allows MPI applications to spawn (non-MPI) sub-processes without memory corruption.
+All in all, for a single machine with 32 cores and 64 hardware threads, we suggest to run the following command:
+
+\begin{ttfenv}
+PATH=build:\$PATH RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bind-to core \CR\\
+build/mallob -t=1 \$options
+\end{ttfenv}
+
+For this specific ``small setup'', we provide scripts which run all experiments automatically -- see the highlighted boxes in each subsection.
+
+
+
+
+
+
+
+
+
+\subsection{Uniform Jobs}
+\label{sec:uniform-jobs}
+
+This set of experiments corresponds to Section~5.1 of our paper.
+We configure a subset of MPI processes (``clients'') to introduce jobs to the system such that each client has $k$ active jobs in the system at any point in time.
+All processes (including clients) participate in job scheduling and processing.
+
+\subsubsection{Original Setup}
+
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering In a Nutshell: Commands for Original Setup}]
+\begin{ttfenvcompact}
+for f in sbatch/uniform-*.sh; do sbatch \$f; done\ \ \# wait until finished!\\
+for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
+\end{ttfenvcompact}
+\end{tcolorbox}
+
+This section involves \textbf{nine experiments} which take around \textbf{six minutes each}.
+For each one, we use the following SLURM directives to allocate 128 machines with 48 physical cores (96 hardware threads) each, using eight hardware threads (four physical cores) for each MPI process (``task''):
+\begin{verbatim}
+#SBATCH --nodes=128
+#SBATCH --ntasks-per-node=12
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-core=2
+#SBATCH -t 00:06:00
+\end{verbatim}
+
+Use the following command-line arguments for Mallob:
+
+\begin{ttfenv}
+-t=4 -q -c=\$numclients -ajpc=\$activejobsperclient -ljpc=\$loadedjobsperclient \CR\\
+-T=320 -log=logs/uniform-\$npar -v=4 -warmup -job-template=\$jobtemplate
+\end{ttfenv}
+
+Define the referenced shell variables as follows for the different runs:\\
+
+{
+\begin{tabular}{|r|r|r|r|r|}
+\hline
+\texttt{\$npar} & \texttt{\$coreminperjob} & \texttt{\$numclients} & \texttt{\$activejobsperclient} & \texttt{\$loadedjobsperclient} \\ \hline
+3 & 640 & 1 & 3 & 6 \\
+6 & 320 & 2 & 3 & 6 \\
+12 & 160 & 4 & 3 & 6 \\
+24 & 80 & 8 & 3 & 6 \\
+48 & 40 & 16 & 3 & 6 \\
+96 & 20 & 16 & 6 & 12 \\
+192 & 10 & 16 & 12 & 24 \\
+384 & 5 & 16 & 24 & 48 \\
+768 & 2.5 & 32 & 24 & 48 \\ \hline
+\end{tabular}
+}
+
+\vspace{0.4cm}
+
+Then define \texttt{\$jobtemplate} as follows:
+
+\begin{ttfenv}
+jobtemplate=templates/job-template-sat-r3unknown\_100k-\$\{coreminperjob\}coremin.json
+\end{ttfenv}
+
+N.B.: As can be seen, the more jobs we process in parallel, the more PEs we configure to introduce jobs (``clients'').
+This is done in order to prevent a single client to become a bottleneck for introducing jobs.
+As such, we can focus on the decentralized scheduling capabilities of our system.
+%We have not yet tested the behaviour of our platform if we employ only a single client for hundreds of parallel jobs.
+
+To retrieve the results of a finished run, execute:
+
+\begin{ttfenv}
+reports/report-uniform-jobs.sh logs/uniform-\$npar
+\end{ttfenv}
+
+Please refer to this shell script for precise information on how each reported value is extracted and calculated.
+
+You should obtain a number of measures which correspond to the ones reported in Table~1 of our paper.
+The different efficiencies reported ($\theta/\theta_{\text{opt}}$, $\eta$, and $u$) should be close to one (>97\%) for all experiments.
+If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we expect that the lowest values are reported for the two extreme cases and that better values are reported in between.
+
+\subsubsection{Small Setup}
+
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
+\begin{ttfenvcompact}
+scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for about 1\,h 12\,min \\
+for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
+\end{ttfenvcompact}
+\end{tcolorbox}
+
+For our ``Small Setup'' (Section~\ref{sec:small-setup}) with 32 cores, we suggest to divide the CPU time allotted to each job by $6144/32=$\,\textbf{192}.
+Furthermore, due to these changes we suggest to adjust the runs as provided in the below table.
+(Note that $n_{\text{par}}$ must not exceed the number of MPI processes for your particular setup.)
+We expect the same qualitative results on such a smaller scale.\\
+
+{
+\begin{tabular}{|r|r|r|r|r|}
+\hline
+\texttt{\$npar} & \texttt{\$coreminperjob} & \texttt{\$numclients} & \texttt{\$activejobsperclient} & \texttt{\$loadedjobsperclient} \\ \hline
+1 & 10 & 1 & 1 & 6 \\
+2 & 5 & 1 & 2 & 6 \\
+4 & 2.5 & 1 & 4 & 8 \\
+8 & 1.25 & 1 & 8 & 16 \\
+16 & 0.625 & 2 & 8 & 16 \\
+32 & 0.3125 & 2 & 16 & 32 \\
+\hline
+\end{tabular}
+}
+
+
+
+
+
+
+
+
+\subsection{Impact of Priorities}
+
+This experiment corresponds to Section~5.2 of our paper.
+We configure a number of clients each of which is associated with a certain priority and introduces a stream of jobs of this priority.
+Again, all MPI processes participate in job scheduling and processing, and our job scheduling enforces that jobs of higher priority receive more resources.
+
+\subsubsection{Original Setup}
+
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering In a Nutshell: Commands for Original Setup}]
+\begin{ttfenvcompact}
+sbatch sbatch/priorities.sh\ \ \ \# wait until finished!\\
+reports/report-impact-of-priorities.sh logs/priorities
+\end{ttfenvcompact}
+\end{tcolorbox}
+
+We use the following SLURM directives to use 32 machines for \textbf{up to six hours} (see below for how to reduce execution time) with an otherwise identical configuration to the one from Section~\ref{sec:uniform-jobs}:
+
+\begin{verbatim}
+#SBATCH --nodes=32
+#SBATCH --ntasks-per-node=12
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-core=2
+#SBATCH -t 06:00:00
+\end{verbatim}
+
+Use the following command line arguments:
+
+\begin{ttfenv}
+-t=4 -q -c=9 -ajpc=1 -jwl=300 -T=21500 -log=logs/priorities -v=4 -warmup -pls=0 \CR\\
+-sjd=1 -job-template=templates/job-template-priorities.json \CR\\
+ -job-desc-template=templates/selection\_isc2020.txt
+\end{ttfenv}
+
+To retrieve results, execute this command from the Mallob base directory:
+\begin{ttfenv}
+reports/report-impact-of-priorities.sh logs/priorities
+\end{ttfenv}
+
+ This script should recognize automatically how many streams with which priorities have been used.
+The script should output a plain text table similar to the table in Fig. 4 (right) in the paper.
+Check that the mean assigned volume grows proportional to the assigned priority, except for rounding offsets.
+Response times should improve (i.e., decrease) for growing priorities.
+
+\subsubsection{Small Setup}
+
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering Commands for Small Setup (Section~\ref{sec:small-setup}) in a Nutshell}]
+\begin{ttfenvcompact}
+scripts/run/reproduce-small-priorities.sh\ \ \ \# runs for about 1\,h\\
+reports/report-impact-of-priorities.sh logs/priorities
+\end{ttfenvcompact}
+\end{tcolorbox}
+
+On 32 cores (Section~\ref{sec:small-setup}), we suggest to reduce the number $k$ of parallel streams to four in order to obtain meaningful differences in the jobs' volumes.
+For this means, set the Mallob command line option \texttt{-c=4}.
+For custom changes in the configuration, make sure that the scheduling algorithm is able to assign different volumes to the jobs (e.g., on two processes each job would receive a single worker no matter their priorities).
+
+In general, to adjust the number $k$ of streams and the values of priorities, edit the files 
+
+\texttt{templates/job-template-priorities.json.\$i}, where $i \in \{0,\ldots,k-1\}$, and replace the value under the key \texttt{"priority"}, and set $k$ as above. 
+
+To reduce the run time of the experiment, we suggest to reduce the wallclock time limit per job from 300\,s down to 60\,s, which reduces the overall run time to one hour.
+To achieve this, set the Mallob command line option \texttt{-jwl=60}.
+Note, however, that this may lead to less pronounced differences between the individual job streams' performances.
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Realistic Job Arrivals}
+
+This set of experiments corresponds to Section~5.3 from our paper.
+We configure a number of clients which introduce jobs from a wide variety of SAT problems at poisson-distributed arrival rates and random priorities and budgets.
+
+\subsubsection{Original Setup}
+
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering In a Nutshell: Commands for Original Setup}]
+\begin{ttfenvcompact}
+for f in sbatch/realistic-*.sh; do sbatch \$f; done\ \ \ \# wait until finished!\\
+reports/report-active-jobs.sh logs/realistic-\{3,1,2\}\\
+reports/report-utilization.sh logs/realistic-1\\
+reports/report-latencies.sh logs/realistic-\{1,4,5,6\}\\
+reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
+\end{ttfenvcompact}
+\end{tcolorbox}
+
+This section features \textbf{eight experiments} which run for \textbf{one hour each}.
+
+ Use these SLURM directives:
+\begin{ttfenv}
+\#SBATCH --nodes=128\\
+\#SBATCH --ntasks-per-node=12\\
+\#SBATCH --cpus-per-task=8\\
+\#SBATCH --ntasks-per-core=2\\
+\#SBATCH -t 01:10:00
+\end{ttfenv}
+
+Use the following base options for Mallob:
+
+\begin{ttfenv}
+-t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-\$rno -v=4 -warmup \CR\\
+-satsolver=kclkclcl -pls=0 -sjd=1 -ba=8  \CR\\
+ -job-template=instances/job-template-priorities.json  \CR\\
+ -job-desc-template=instances/selection\_isc2020\_394.txt  \CR\\
+ -client-template=instances/\$clienttemplate
+\end{ttfenv}
+
+With the following additional configuration:\\
+
+{
+\begin{tabular}{|r|l|l|l|}
+\hline
+\texttt{\$rno} & Run description & \texttt{\$clienttemplate} & Additional options \\
+\hline
+1 & \textbf{Default}, $1/\lambda=5\,s$ & client-template.json & \texttt{-dc=0 -huca=0 -rs=1} \\
+2 & $1/\lambda=2.5\,s$ & client-template-doublejobs.json & \texttt{-dc=0 -huca=0 -rs=1} \\
+3 & $1/\lambda=10\,s$ & client-template-halfjobs.json & \texttt{-dc=0 -huca=0 -rs=1} \\
+\hline
+4 & $h=10$ & client-template.json & \texttt{-dc=0 -huca=10 -rs=1} \\
+5 & $h=100$ & client-template.json & \texttt{-dc=0 -huca=100 -rs=1} \\
+%6 & $h=1000$ & client-template.json & \texttt{-dc=0 -huca=1000 -rs=1} \\
+6 & $h=\infty$ & client-template.json & \texttt{-dc=0 -huca=-1 -rs=1} \\
+\hline
+7 & No worker reuse & client-template.json & \texttt{-dc=0 -huca=0 -rs=0} \\
+8 & Basic worker reuse & client-template.json & \texttt{-dc=1 -huca=0 -rs=0} \\
+\hline
+\end{tabular}
+}
+\vspace{0.4cm}
+
+
+To output plots as in Fig.~5 in our paper, use these commands:
+\begin{verbatim}
+ bash reports/report-active-jobs.sh logs/realistic-{3,1,2}
+ bash reports/report-utilization.sh logs/realistic-1
+\end{verbatim}
+Both commands will output a graph which should be similar to the plots in the paper.
+You may need to scale the graph appropriately, either via the UI of PyPlot or within the respective bash script by adding options \texttt{-xmin=/-xmax=/-ymin=/-ymax=} to the call of the Python script \texttt{plot\_curves.py}.
+
+Similarly, to reproduce Fig.~6 from our paper, execute:
+\begin{verbatim}
+ bash reports/report-latencies.sh logs/realistic-{1,4,5,6}
+\end{verbatim}
+
+And last but not least, to reproduce Table~2 from our paper, execute:
+\begin{verbatim}
+ bash reports/report-worker-reuse.sh logs/realistic-{7,8,1}
+\end{verbatim}
+
+
+\subsubsection{Small Setup}
+
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
+\begin{ttfenvcompact}
+scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for about 1\,h 20\,min\\
+reports/report-active-jobs.sh logs/realistic-{3,1,2}\\
+reports/report-utilization.sh logs/realistic-1\\
+reports/report-latencies.sh logs/realistic-{1,4,5,6}\\
+reports/report-worker-reuse.sh logs/realistic-{7,8,1}
+\end{ttfenvcompact}
+\end{tcolorbox}
+
+For shorter runs, we suggest to reduce the duration of each run to ten minutes by setting \texttt{-T=600}.
+For small-scale runs (Section~\ref{sec:small-setup}), prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate}, which reduces the number and size of jobs accordingly.
+
+
+\section{Troubleshooting}
+
+\subsection{Known Issues}
+
+During the experiments you may encounter errors being reported.
+There are two known issues with the provided version of Mallob:
+\begin{itemize}
+ \item Due to a race condition, an internal assumption may fail in the solver process, which leads to this process aborting. As we have included some degree of fault-tolerance on this level, the solver process will be restarted and the scheduling of the system is not affected. This error occurs rarely (approximately once every 1\,000--10\,000 core-h), hence the impact on response times is negligible.
+ \item A memory error may occur during the transfer of a large job description. This may lead to the job description being corrupted. The solver process recognizes this inconsistency and crashes. Unfortunately, as there is no fallback protocol for corrupted job descriptions, the solver process will crash repeatedly as attempts are made to restart it.
+ In our experience, this error occurs very rarely (approximately once every 10\,000 core-h) which also renders the error negligible.
+\end{itemize}
+These errors have been fixed in more recent versions of Mallob, however we decided to provide the exact version of Mallob our experiments were conducted with.
+Errors in Mallob generate files \texttt{mallob\_thread\_trace\_*} in the base directory.
+As long as a run finishes successfully, these files can be removed afterwards; however, they may provide some insights if an unexpected error occurs.
+
+\subsection{Performance Problems}
+
+If you encounter worse performance than expected in some of the experiments, please search the log files for the text ``\texttt{[WARN] Watchdog: No reset}``.
+If this line occurs frequently and the indicated number of milliseconds for which no reset occurred exceeds 100\,ms, then your setup is likely to suffer from a performance problem.
+Check the following points:
+\begin{itemize}
+\item The machine is not oversubscribed and the binding to cores is correct. In general, each MPI process should have access to $2n$ hardware threads if the option \texttt{-t=}$n$ is set.
+\item The file system where the log directory resides allows for sufficiently fast logging. If possible, use a local file system or a file system with high bandwidth for your log directory. Try to reduce Mallob's verbosity (e.g., \texttt{-v=3} or \texttt{-v=2}) to probe whether this might be a problem.
+\item The machine is not running demanding processes apart from Mallob.
+Administration and monitoring tasks such as \texttt{ssh}, \texttt{htop}, or \texttt{tail -f} are usually fine, but computationally heavy tasks which make full use of one or multiple hardware threads are not.
+\end{itemize}
+
+
+
+% sbatch/mallob_satscheduler.sh
+
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+%\bibliographystyle{splncs04}
+%\bibliography{references_short}
+%
+
+\end{document}

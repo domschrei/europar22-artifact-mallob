@@ -1,0 +1,8 @@
+1 small-client-template.json -dc=0 -huca=0 -rs=1
+2 small-client-template-doublejobs.json -dc=0 -huca=0 -rs=1
+3 small-client-template-halfjobs.json -dc=0 -huca=0 -rs=1
+4 small-client-template.json -dc=0 -huca=10 -rs=1
+5 small-client-template.json -dc=0 -huca=100 -rs=1
+6 small-client-template.json -dc=0 -huca=-1 -rs=1
+7 small-client-template.json -dc=0 -huca=0 -rs=0
+8 small-client-template.json -dc=1 -huca=0 -rs=0
