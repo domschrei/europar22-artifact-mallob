@@ -144,7 +144,7 @@ Mallob is a C++17 application linked with MPI. Only Linux on \texttt{x86\_64} ar
 To build Mallob, follow these steps from the base directory of this artifact:
 \begin{enumerate}
  \item Fetch and build all external SAT solvers which are included in Mallob:\\
- \texttt{( cd lib \&\& bash fetch\_and\_build\_solvers.sh )}
+ \texttt{( cd lib \&\& bash fetch\_and\_build\_sat\_solvers.sh )}
  \item Create a build directory:\ \ \ \texttt{mkdir -p build; cd build}
  \item Generate build files with CMake:
  \begin{ttfenv}
@@ -164,7 +164,7 @@ You might need to build Mallob on a platform without direct internet access, as 
 We have set up a temporary SSH file system (SSHFS) which mounts a user directory of the cluster at our own machine.
 (Please refer to the documentation of your cluster for more information.)
 
-On your machine with internet access, download and extract the artifact to the mounted directory and fetch the SAT solvers and (if desired) jemalloc by executing \texttt{fetch\_sat\_solvers.sh} and \texttt{fetch\_jemalloc.sh} from the \texttt{lib/} subdirectory.
+On your machine with internet access, download and extract the artifact to the mounted directory and fetch the SAT solvers and (if desired) jemalloc by executing \texttt{fetch\_solvers.sh} and \texttt{fetch\_jemalloc.sh} from the \texttt{lib/} subdirectory.
 After these steps, follow the usual build procedure on the cluster (calling again \texttt{fetch\_and\_build\_...} where you previously only called \texttt{fetch\_...}).
 
 \subsection{Fetch Benchmarks}
@@ -554,10 +554,10 @@ And last but not least, to reproduce Table~2 from our paper, execute:
   title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
 \begin{ttfenvcompact}
 scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for about 1\,h 20\,min\\
-reports/report-active-jobs.sh logs/realistic-{3,1,2}\\
+reports/report-active-jobs.sh logs/realistic-\{3,1,2\}\\
 reports/report-utilization.sh logs/realistic-1\\
-reports/report-latencies.sh logs/realistic-{1,4,5,6}\\
-reports/report-worker-reuse.sh logs/realistic-{7,8,1}
+reports/report-latencies.sh logs/realistic-\{1,4,5,6\}\\
+reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 \end{ttfenvcompact}
 \end{tcolorbox}
 
