@@ -3,7 +3,7 @@
 set -e
 
 if [ -z $1 ]; then
-    solvers="cglmyk"
+    solvers="cylk"
     echo "Defaulting to solvers $solvers (supply another string to override solvers to build)"
 else
     solvers="$1"
