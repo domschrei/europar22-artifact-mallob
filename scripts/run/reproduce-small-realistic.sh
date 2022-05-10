@@ -6,7 +6,7 @@ cat scripts/run/configs-small-realistic.csv|while read -r line; do
 
     rno=$(echo $line|awk '{print $1}')
     clienttemplate=$(echo $line|awk '{print $2}')
-    moreoptions=$(echo $line|awk '{print $1="";$2="";print $0}')
+    moreoptions=$(echo $line|awk '{for (i=3; i <= NF; i++) {printf("%s ", $i)}; printf("\n")}')
 
     logdir="logs/realistic-$rno"
     if [ -d $logdir ]; then

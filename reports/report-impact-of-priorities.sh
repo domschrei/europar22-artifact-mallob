@@ -54,8 +54,8 @@ cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk 
   V[stream] = ratio*v + (1-ratio)*V[stream];\
   T[stream] += t;\
  }\
- for (stream in V) {print V[stream]}\
-}' >> data/volumes
+ for (stream in V) {print stream,V[stream]}\
+}' | sort -g | awk '{print $2}' >> data/volumes
 
 # Collect response times for each stream
 echo "MeanRT[s]" > data/times
@@ -75,8 +75,8 @@ done >> data/times
 paste data/{priorities,volumes,times} |column -t
 
 # Create files for plotting
-paste data/{priorities,volumes} > data/volume_per_prio
-paste data/{priorities,times} > data/time_per_prio
+paste data/{priorities,volumes}|tail -$numclients|sort -g|tr '\t' ' ' > data/volume_per_prio
+paste data/{priorities,times}|tail -$numclients|sort -g|tr '\t' ' ' > data/time_per_prio
 
 # Plot
 cd "$calldir"
