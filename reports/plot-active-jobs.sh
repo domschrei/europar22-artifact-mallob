@@ -14,7 +14,7 @@ files=""
 legends=""
 for basedir in $@; do
     cd "$basedir"
-    files="$files ${calldir}/data/active_jobs"
+    files="$files ${basedir}/data/active_jobs"
     legends="$legends -l=$(basename "$basedir")"
     cd "$calldir"
 done

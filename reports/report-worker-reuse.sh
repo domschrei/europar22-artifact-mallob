@@ -52,9 +52,9 @@ for d in $@ ; do
       print("V", job, maxvol[job])\
      }\
     }' > _max_volume_per_job
-    
+
     # Calculate number of distinct workers created for each job
-    cat _worker_events|grep "LOAD 1"|sed 's/[()+#-]//g'|sed 's/:/ /g'|awk '{\
+    cat _worker_events|grep "LOAD 1"|sed 's/[()+#-]//g'|sed 's/:/ /g'|gawk '{\
      rank=$2; job=$5; idx=$6;\
      ccs[job][idx][rank]=1;\
     } END {\
@@ -107,7 +107,7 @@ for d in $@ ; do
     #echo "  Mean response time: $meanrt"
     
     # Calculate worker creation occurrences
-    cat _worker_events|grep "LOAD 1"|sed 's/[()+#-]//g'|sed 's/:/ /g'|awk '{cs[$5][$6]+=1} END {\
+    cat _worker_events|grep "LOAD 1"|sed 's/[()+#-]//g'|sed 's/:/ /g'|gawk '{cs[$5][$6]+=1} END {\
      for (j in cs) {\
       for (i in cs[j]) {\
        occs[cs[j][i]]+=1\
@@ -127,6 +127,9 @@ for d in $@ ; do
     # Report CDF at different points
     for i in $cdf_eval_points; do
         prob=$(cat _worker_creation_cdf|awk '$1 == '$(($i+1))' {print $2}')
+	if [ -z $prob ]; then
+            prob="1"
+	fi
         echo -ne "$prob "
     done
     # Line break

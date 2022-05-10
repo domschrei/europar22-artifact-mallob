@@ -18,4 +18,4 @@ for basedir in $@; do
     cd "$calldir"
 done
 
-report/plot-active-jobs.sh $@
+reports/plot-active-jobs.sh $@

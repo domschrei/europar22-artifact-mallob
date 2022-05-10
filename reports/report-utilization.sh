@@ -31,4 +31,4 @@ for window in 1 15 60; do
 done
 
 # Plot utilization
-report/plot-utilization.sh $@
+reports/plot-utilization.sh $@
