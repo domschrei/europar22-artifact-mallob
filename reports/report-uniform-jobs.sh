@@ -24,6 +24,8 @@ lastclient=$(echo */|tr ' ' '\n'|grep -E '^[0-9]+/$'|sort -g|tail -1|sed 's,/,,g
 firstclient=$(($lastclient - $numclients + 1))
 # Calculate the number of parallel jobs
 npar=$(($numclients * $ajpc))
+# Extract the number of core minutes allotted to each job
+coreminperjob=$(echo $options|grep -oE "\-[0-9\.]+coremin"|grep -oE "[0-9\.]+")
 
 echo "******************************************************"
 echo "Log directory: $basedir (npar=$npar)"    
@@ -31,10 +33,8 @@ echo "Log directory: $basedir (npar=$npar)"
 # Extract the required warmup time until Mallob was set up to take jobs
 warmuptime=$(cat "$firstclient"/log.*|grep "I am worker"|head -1|awk '{print $1}')
 
-echo "Warmup time: $warmuptime"s
-
 # Compute the maximum throughput measured:
-# We filter lines which report the number of jobs processed 
+# We filter lines which report the number of jobs processed
 # and use the lines' timestamps to compute the throughput.
 maxthroughput=$(cat "$firstclient"/log.*|grep "processed="|sed 's/[a-z]\+=//g'|\
 awk 'BEGIN {max=0} {tp=$7/($1-'$warmuptime'); max=tp>max?tp:max} END {print max}')
@@ -46,6 +46,18 @@ optthroughput=$(echo "$npar*3.2/60"|bc -l|sed -e 's/^-\./-0./' -e 's/^\./0./')
 
 echo "Opt. throughput: $optthroughput jobs/sec"
 echo "Througput efficiency: $(echo "$maxthroughput/$optthroughput"|bc -l)"
+
+totalbusysecs=$(cat */log.*|grep -E "LOAD| TIMEOUT "|sed 's/[-+:#)(]/ /g'|awk '\
+ /LOAD 1/ {lasttime[$2]=$1} \
+ /LOAD 0/ {busytime[$5]+=$1-lasttime[$2]} \
+ /TIMEOUT/ {finished[$4]=1} \
+ END {for (j in finished) {total+=busytime[j]}; print total}\
+')
+numprocessed=$(grep -E "RESPONSE_TIME| TIMEOUT " */log.*|wc -l)
+advertisedcoresecs=$(echo "$numprocessed * $coreminperjob * 60"|bc -l)
+workeff=$(echo "$totalbusysecs / $advertisedcoresecs"|bc -l)
+
+echo "Work efficiency: $workeff"
 
 # Compute the average measured CPU utilization of worker threads:
 # Extract all measured cpu ratios from the subprocess log files,
