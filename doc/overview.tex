@@ -94,8 +94,14 @@
 
 This document serves as a documentation on the software artifact associated with our Euro-Par 2022 publication (named as above).
 In particular, we describe how to build and run our scheduling platform Mallob and how to reproduce our experiments.
-As our research was conducted on a large configuration (1536--6144 cores) of a commodity cluster with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame where applicable.
-As such, we expect that our experiments can be simulated on a much smaller scale with similar qualitative results.
+As our research was conducted on a large configuration (1536--6144 cores) of a commodity cluster with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame ($<3$\,h in total).
+As such, our experiments can be simulated on a much smaller scale with similar results on a qualitative level.
+
+
+
+
+
+
 
 \section{Getting Started}
 
@@ -105,28 +111,15 @@ Throughout the document, we assume basic familiarity with the command-line inter
 \subsection{Prerequisites}
 \label{sec:prerequisites}
 
-As a point of reference, installing the following packages (including required dependencies) is sufficient to build and execute Mallob on an Ubuntu 20.04 clean base image of Docker:
+On an Ubuntu 20.04 system, the following packages with their dependencies are sufficient to build and execute Mallob and to run our scripts (except for producing plots, see Section~\ref{sec:plots}).
 
 \begin{ttfenv}
 sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils \CR\\
-build-essential cmake wget libjemalloc-dev libjemalloc2 gdb
+build-essential cmake wget gdb gawk
 \end{ttfenv}
 
-If jemalloc is not available on your machine and you have no installation rights, you can execute
 
-\begin{ttfenv}
-( cd lib \&\& bash fetch\_and\_build\_jemalloc.sh )
-\end{ttfenv}
 
-and explicitly point to its directory while building Mallob (see below).
-
-We use PyPlot / Matplotlib for outputting plots from experiments.
-In order to produce plots from our experiments via the scripts we provide, you require Python 3 and a functional Matplotlib installation.
-It should suffice to install the following package with its required dependencies:
-
-\begin{ttfenv}
-sudo apt install python3-matplotlib
-\end{ttfenv}
 
 
 
@@ -143,29 +136,30 @@ Mallob is a C++17 application linked with MPI. Only Linux on \texttt{x86\_64} ar
 
 To build Mallob, follow these steps from the base directory of this artifact:
 \begin{enumerate}
- \item Fetch and build all external SAT solvers which are included in Mallob:\\
+ \item Build \texttt{jemalloc} (scalable memory allocator):\\
+ \texttt{( cd lib \&\& bash fetch\_and\_build\_jemalloc.sh )}
+ \item Build the external SAT solvers Mallob uses in our experiments:\\
  \texttt{( cd lib \&\& bash fetch\_and\_build\_sat\_solvers.sh )}
  \item Create a build directory:\ \ \ \texttt{mkdir -p build; cd build}
  \item Generate build files with CMake:
  \begin{ttfenv}
  CC=\$(which mpicc) CXX=\$(which mpicxx) cmake -DCMAKE\_BUILD\_TYPE=RELEASE \CR\\
- -DMALLOB\_USE\_JEMALLOC=1 -DMALLOB\_LOG\_VERBOSITY=4 -DMALLOB\_ASSERT=1 ..
+ -DMALLOB\_USE\_JEMALLOC=1 -DMALLOB\_LOG\_VERBOSITY=4 -DMALLOB\_ASSERT=1 \CR\\
+ -DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib ..
  \end{ttfenv}
- If using a local installation (see Section~\ref{sec:prerequisites}), additionally set:\\
- \texttt{-DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib}\\
- Alternatively, if no jemalloc implementation is present, you can instead set\\
- \texttt{-DMALLOB\_USE\_JEMALLOC=0} which builds Mallob with the default \texttt{malloc} implementation.
  \item Build Mallob:\ \ \ \texttt{make; cd ..}
 \end{enumerate}
 
+\iffalse
 \subsubsection{Build without Internet Access}
 
 You might need to build Mallob on a platform without direct internet access, as was the case for the cluster we used.
-We have set up a temporary SSH file system (SSHFS) which mounts a user directory of the cluster at our own machine.
-(Please refer to the documentation of your cluster for more information.)
-
-On your machine with internet access, download and extract the artifact to the mounted directory and fetch the SAT solvers and (if desired) jemalloc by executing \texttt{fetch\_solvers.sh} and \texttt{fetch\_jemalloc.sh} from the \texttt{lib/} subdirectory.
-After these steps, follow the usual build procedure on the cluster (calling again \texttt{fetch\_and\_build\_...} where you previously only called \texttt{fetch\_...}).
+%We have set up a temporary SSH file system (SSHFS) which mounts a user directory of the cluster at our own machine.
+%(Please refer to the documentation of your cluster for more information.)
+On your machine with internet access, download and extract the artifact and fetch the SAT solvers and (if desired) jemalloc by executing \texttt{fetch\_solvers.sh} and \texttt{fetch\_jemalloc.sh} from the \texttt{lib/} subdirectory.
+After these steps, copy the directory structure to the cluster.
+On the cluster, follow the usual build procedure, calling again \texttt{fetch\_and\_build\_...} where you previously only called \texttt{fetch\_...}.
+\fi
 
 \subsection{Fetch Benchmarks}
 
@@ -175,6 +169,10 @@ You can fetch them with the following command:
 ( cd instances \&\& bash fetch\_sat2020\_instances.sh )
 \end{ttfenv}
 Please consider that all instances together take about 33$\,$GiB of disk space.
+
+If, for some reason, you are not able to download these benchmarks, we included the 80 smallest instances among them in our artifact.
+To use them instead of the full set of benchmarks, replace the content of the files \texttt{templates/selection\_isc2020.txt} and \texttt{templates/selection\_isc2020\_384.txt} with the content of the file \texttt{templates/selection\_isc2020\_smallest\_included.txt}.
+This modification \textbf{will} change the outcome of our experiments, as this renders the jobs much simpler to solve on average.
 
 \subsection{Test Run}
 
@@ -188,6 +186,34 @@ PATH=build:\$PATH RDMAV\_FORK\_SAFE=1 mpirun -np 4 build/mallob -T=60 \CR\\
 \end{ttfenv}
 
 This should process a single SAT formula with four MPI processes (i.e., four workers) for 60 seconds and then exit unsuccessfully. (Exiting with a solution would be a very lucky outcome in this case.)
+
+\subsection{On Producing Plots}
+\label{sec:plots}
+
+We use PyPlot / Matplotlib for outputting plots from experiments.
+In order to produce plots from our experiments via the scripts we provide, you require Python 3 and a functional Matplotlib installation.
+It should suffice to install the following package with its required dependencies:
+
+\begin{ttfenv}
+sudo apt install python3-matplotlib
+\end{ttfenv}
+
+As compute servers oftentimes do not have access to the graphical packages which Matplotlib requires, we facilitate the process of extracting data from the large run logs on the compute server and then transferring the data to a computer with a graphical environment in order to plot them.
+For a log directory $d$ in \texttt{logs/}, we provide scripts (\texttt{reports/report-*.sh}) which create files in \texttt{logs/$d$/data} and then attempt to plot the data.
+On a server without graphical capabilities, this attempt will fail, but only after all data has been written to \texttt{logs/$d$/data}.
+Copy these sub-directories to the same relative path of the artifact project on your machine with plotting capabilities.
+You can then plot the data by calling the respective scripts \texttt{reports/plot-*.sh} with the same arguments as how you called \texttt{reports/report-*.sh}.
+
+We use a custom Python script for plotting data.
+You find how it is called in the files \texttt{reports/plot-*.sh}.
+You can modify each call to your liking.
+Most importantly, you can set the visualized bounding box of the plot with the options \texttt{-xmin=/-xmax=/-ymin=/-ymax=}, and you can output the plot into a PDF file using \texttt{-o=path/to/output.pdf}.
+
+
+
+
+
+
 
 
 
@@ -258,7 +284,7 @@ build/mallob -t=1 \$options
 For this specific ``small setup'', we provide scripts which run all experiments automatically -- see the highlighted boxes in each subsection.
 
 We tested all ``small setup'' experiments on a machine with four 8-core Intel Xeon E5-4640 CPUs clocked at 2.4\,GHz and with 512\,GB of RAM.
-The machine ran Ubuntu 20.04 with Linux kernel 5.4.
+The machine ran Ubuntu 20.04 with Linux kernel 5.4, and we used Open MPI 4.0.3.
 
 
 
@@ -296,14 +322,14 @@ For each one, we use the following SLURM directives to allocate 128 machines wit
 #SBATCH -t 00:06:00
 \end{verbatim}
 
-Use the following command-line arguments for Mallob:
+We use the following command-line arguments for Mallob:
 
 \begin{ttfenv}
 -t=4 -q -c=\$numclients -ajpc=\$activejobsperclient -ljpc=\$loadedjobsperclient \CR\\
 -T=320 -log=logs/uniform-\$npar -v=4 -warmup -job-template=\$jobtemplate
 \end{ttfenv}
 
-Define the referenced shell variables as follows for the different runs:\\
+We define the referenced shell variables as follows for the different runs:\\
 
 {
 \begin{tabular}{|r|r|r|r|r|}
@@ -323,7 +349,7 @@ Define the referenced shell variables as follows for the different runs:\\
 
 \vspace{0.4cm}
 
-We instantiate a job template file and define \texttt{\$jobtemplate} as follows:
+We instantiate a job template file (\texttt{\$jobtemplate}) for a specific CPU limit as follows:
 
 \begin{ttfenv}
 jobtemplate=templates/job-template-sat-r3unknown\_100k-\$\{coreminperjob\}coremin.json\\
@@ -336,15 +362,8 @@ This is done in order to prevent a single client to become a bottleneck for intr
 As such, we can focus on the decentralized scheduling capabilities of our system.
 %We have not yet tested the behaviour of our platform if we employ only a single client for hundreds of parallel jobs.
 
-To retrieve the results of a finished run, execute:
-
-\begin{ttfenv}
-reports/report-uniform-jobs.sh logs/uniform-\$npar
-\end{ttfenv}
-
-Please refer to this shell script for precise information on how each reported value is extracted and calculated.
-
-You should obtain a number of measures which correspond to the ones reported in Table~1 of our paper.
+Please refer to the shell script \texttt{reports/report-uniform-jobs.sh} for precise information on how we extract and compute statistics from the runs.
+Running the script as indicated above, you should obtain a number of measures which correspond to the ones reported in Table~1 of our paper.
 The different efficiencies reported ($\theta/\theta_{\text{opt}}$, $\eta$, and $u$) should be close to one (>97\%) for all experiments.
 If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we expect that the lowest values are reported for the two extreme cases and that better values are reported in between.
 
@@ -355,7 +374,7 @@ If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we 
   colframe=Magenta!75!black,
   title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for about 1\,h 12\,min \\
+scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for 36\,min \\
 for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
 \end{tcolorbox}
@@ -408,13 +427,10 @@ We use the following SLURM directives to use 32 machines for \textbf{up to six h
 
 \begin{verbatim}
 #SBATCH --nodes=32
-#SBATCH --ntasks-per-node=12
-#SBATCH --cpus-per-task=8
-#SBATCH --ntasks-per-core=2
 #SBATCH -t 06:00:00
 \end{verbatim}
 
-Use the following command line arguments:
+We use the following command line arguments:
 
 \begin{ttfenv}
 -t=4 -q -c=9 -ajpc=1 -jwl=300 -T=21500 -log=logs/priorities -v=4 -warmup -pls=0 \CR\\
@@ -422,12 +438,7 @@ Use the following command line arguments:
  -job-desc-template=templates/selection\_isc2020.txt
 \end{ttfenv}
 
-To retrieve results, execute this command from the Mallob base directory:
-\begin{ttfenv}
-reports/report-impact-of-priorities.sh logs/priorities
-\end{ttfenv}
-
- This script should recognize automatically how many streams with which priorities have been used.
+The script \texttt{reports/report-impact-of-priorities.sh} should recognize automatically how many streams with which priorities have been used.
 The script should output a plain text table similar to the table in Fig. 4 (right) in the paper.
 Check that the mean assigned volume grows proportional to the assigned priority, except for rounding offsets.
 Response times should improve (i.e., decrease) for growing priorities.
@@ -439,7 +450,7 @@ Response times should improve (i.e., decrease) for growing priorities.
   colframe=Magenta!75!black,
   title={\centering Commands for Small Setup (Section~\ref{sec:small-setup}) in a Nutshell}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-priorities.sh\ \ \ \# runs for about 1\,h\\
+scripts/run/reproduce-small-priorities.sh\ \ \ \# runs for 1\,h\\
 reports/report-impact-of-priorities.sh logs/priorities
 \end{ttfenvcompact}
 \end{tcolorbox}
@@ -454,7 +465,7 @@ In general, to adjust the number $k$ of streams and the values of priorities, ed
 
 To reduce the run time of the experiment, we suggest to reduce the wallclock time limit per job from 300\,s down to 60\,s, which reduces the overall run time to one hour.
 To achieve this, set the Mallob command line option \texttt{-jwl=60}.
-Note, however, that this may lead to less pronounced differences between the individual job streams' performances.
+Note, however, that this setup leads to less pronounced differences between the individual job streams' performances.
 
 
 
@@ -488,16 +499,12 @@ reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 
 This section features \textbf{eight experiments} which run for \textbf{one hour each}.
 
- Use these SLURM directives:
+We use the same SLURM directives as in Section~\ref{sec:uniform-jobs} except for the time limit:
 \begin{ttfenv}
-\#SBATCH --nodes=128\\
-\#SBATCH --ntasks-per-node=12\\
-\#SBATCH --cpus-per-task=8\\
-\#SBATCH --ntasks-per-core=2\\
 \#SBATCH -t 01:10:00
 \end{ttfenv}
 
-Use the following base options for Mallob:
+We use the following base options for Mallob:
 
 \begin{ttfenv}
 -t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-\$rno -v=4 -warmup \CR\\
@@ -537,7 +544,6 @@ To output plots as in Fig.~5 in our paper, use these commands:
  bash reports/report-utilization.sh logs/realistic-1
 \end{verbatim}
 Both commands will output a graph which should be similar to the plots in the paper.
-You may need to scale the graph appropriately, either via the UI of PyPlot or within the respective bash script by adding options \texttt{-xmin=/-xmax=/-ymin=/-ymax=} to the call of the Python script \texttt{plot\_curves.py}.
 
 Similarly, to reproduce Fig.~6 from our paper, execute:
 \begin{verbatim}
@@ -557,7 +563,7 @@ And last but not least, to reproduce Table~2 from our paper, execute:
   colframe=Magenta!75!black,
   title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for about 1\,h 20\,min\\
+scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 1\,h 20\,min\\
 reports/report-active-jobs.sh logs/realistic-\{3,1,2\}\\
 reports/report-utilization.sh logs/realistic-1\\
 reports/report-latencies.sh logs/realistic-\{1,4,5,6\}\\
@@ -567,6 +573,7 @@ reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 
 For shorter runs, we suggest to reduce the duration of each run to ten minutes by setting \texttt{-T=600}.
 For small-scale runs (Section~\ref{sec:small-setup}), prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate}, which reduces the number and size of jobs accordingly.
+In particular, we reduced the arrival rates to $1/\lambda \in \{3.\overline{3}\,s, 6.\overline{6}\,s, 13.\overline{3}\,s\}$, reduced the mean wallclock time limit per job from 300\,s to 30\,s, and slightly reduced the size of individual bursts of jobs.
 
 
 \section{Troubleshooting}
@@ -580,7 +587,8 @@ There are two known issues with the provided version of Mallob:
  \item A memory error may occur during the transfer of a large job description. This may lead to the job description being corrupted. The solver process recognizes this inconsistency and crashes. Unfortunately, as there is no fallback protocol for corrupted job descriptions, the solver process will crash repeatedly as attempts are made to restart it.
  In our experience, this error occurs very rarely (approximately once every 10\,000 core-h) which also renders the error negligible.
 \end{itemize}
-These errors have been fixed in more recent versions of Mallob, however we decided to provide the exact version of Mallob our experiments were conducted with.
+These errors have been fixed in more recent versions of Mallob.
+However, as the fixes for these problems are non-trivial and change (improve) the performance of our system, we decided to rather provide the exact version of Mallob our experiments were conducted with.
 Errors in Mallob generate files \texttt{mallob\_thread\_trace\_*} in the base directory.
 As long as a run finishes successfully, these files can be removed afterwards; however, they may provide some insights if an unexpected error occurs.
 
@@ -595,6 +603,13 @@ Check the following points:
 \item The machine is not running demanding processes apart from Mallob.
 Administration and monitoring tasks such as \texttt{ssh}, \texttt{htop}, or \texttt{tail -f} are usually fine, but computationally heavy tasks which make full use of one or multiple hardware threads are not.
 \end{itemize}
+
+If you check your local system's utilization while running Mallob, e.g., using \texttt{htop}, it should look something like this:
+\begin{center}
+\includegraphics[width=\textwidth]{../sample-output/htop-32cores.png}
+\end{center}
+Note that for $1 \leq c < 32$, hardware thread $c$ is ``almost idle'' while hardware thread $c+32$ is fully utilized, or vice versa.
+The only exception here is $c=32$ where both hardware threads are fully utilized; this is a ``client'' PE which currently parses a job description (SAT formula).
 
 
 

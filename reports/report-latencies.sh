@@ -22,23 +22,23 @@ for d in $@ ; do
     
     # Sort balancing and treegrowth latencies
     for l in balancing treegrowth; do 
-        cat $d/*/*${l}*|sort -g > $d/${l}-latencies 
+        cat $d/*/*${l}*|sort -g > $d/data/${l}-latencies 
     done
     # Extract initial scheduling latencies
-    > $d/init-latencies
+    > $d/data/init-latencies
     for i in $(seq $firstclient $lastclient); do
-        cat $d/$i/*|grep Scheduling|grep -oE "latency:.*"|grep -oE "[0-9\.]+" >> $d/init-latencies
+        cat $d/$i/*|grep Scheduling|grep -oE "latency:.*"|grep -oE "[0-9\.]+" >> $d/data/init-latencies
     done
-    LC_ALL=C sort -s -g $d/init-latencies -o $d/init-latencies
+    LC_ALL=C sort -s -g $d/data/init-latencies -o $d/data/init-latencies
     
     # Generate histograms
-    for f in $d/*-latencies ; do
+    for f in $d/data/*-latencies ; do
         cat "$f"|awk '{printf("%.3f\n", $1)}'|awk '{h[$1] += 1} END {for (t in h) {print t,h[t]}}'\
         |LC_ALL=C sort -g > ${f}-histogram
     done
     
     # Normalize histograms
-    for f in $d/*-latencies-histogram ; do 
+    for f in $d/data/*-latencies-histogram ; do 
         sum=$(cat $f|awk '{s+=$2} END {print s}')
         cat $f|awk '{print $1,$2/'$sum'}' > $f-normalized
     done
