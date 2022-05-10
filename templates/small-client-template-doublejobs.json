@@ -13,7 +13,7 @@
     },
     "arrival": {
         "type": "exponential",
-        "params": [0.15]
+        "params": [0.3]
     },
     "burstsize": {
         "type": "normal",
