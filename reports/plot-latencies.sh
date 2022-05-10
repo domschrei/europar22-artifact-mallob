@@ -13,9 +13,9 @@ files_bala=""
 legends=""
 for d in $@ ; do
     # Append to plot files and legend labels
-    files_init="$files_init $d/init-latencies-histogram-normalized"
-    files_tree="$files_tree $d/treegrowth-latencies-histogram-normalized"
-    files_bala="$files_bala $d/balancing-latencies-histogram-normalized"
+    files_init="$files_init $d/data/init-latencies-histogram-normalized"
+    files_tree="$files_tree $d/data/treegrowth-latencies-histogram-normalized"
+    files_bala="$files_bala $d/data/balancing-latencies-histogram-normalized"
     legends="$legends -l=$d"
 done
 

@@ -1,0 +1,54 @@
+******************************************************
+Log directory: logs/uniform-1 (npar=1)
+Max. throughput: 0.0525421 jobs/sec
+Opt. throughput: 0.05333333333333333333 jobs/sec
+Througput efficiency: .98516437500000000006
+Work efficiency: .99532708333333333333
+Mean measured CPU utilization of worker threads: 0.999471
+******************************************************
+
+******************************************************
+Log directory: logs/uniform-2 (npar=2)
+Max. throughput: 0.105493 jobs/sec
+Opt. throughput: 0.10666666666666666666 jobs/sec
+Througput efficiency: .98899687500000000006
+Work efficiency: .99271979166666666666
+Mean measured CPU utilization of worker threads: 0.999467
+******************************************************
+
+******************************************************
+Log directory: logs/uniform-4 (npar=4)
+Max. throughput: 0.211786 jobs/sec
+Opt. throughput: 0.21333333333333333333 jobs/sec
+Througput efficiency: .99274687500000000001
+Work efficiency: .99498383838383838383
+Mean measured CPU utilization of worker threads: 0.998232
+******************************************************
+
+******************************************************
+Log directory: logs/uniform-8 (npar=8)
+Max. throughput: 0.422873 jobs/sec
+Opt. throughput: 0.42666666666666666666 jobs/sec
+Througput efficiency: .99110859375000000001
+Work efficiency: .99643053435114503816
+Mean measured CPU utilization of worker threads: 0.998619
+******************************************************
+
+******************************************************
+Log directory: logs/uniform-16 (npar=16)
+Max. throughput: 0.83768 jobs/sec
+Opt. throughput: 0.85333333333333333333 jobs/sec
+Througput efficiency: .98165625000000000000
+Work efficiency: .99693435114503816793
+Mean measured CPU utilization of worker threads: 0.997284
+******************************************************
+
+******************************************************
+Log directory: logs/uniform-32 (npar=32)
+Max. throughput: 1.66716 jobs/sec
+Opt. throughput: 1.70666666666666666666 jobs/sec
+Througput efficiency: .97685156250000000000
+Work efficiency: .99746413181242078580
+Mean measured CPU utilization of worker threads: 0.995407
+******************************************************
+ 

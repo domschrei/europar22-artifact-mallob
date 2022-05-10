@@ -1,0 +1,6 @@
+4 priority streams found.
+Prio  MeanVol  MeanRT[s]
+1     16.279   236.178
+0.5   8.27038  250.464
+0.3   5.15713  257.619
+0.2   3.09731  268.276

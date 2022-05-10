@@ -1,0 +1,183 @@
+c 
+c Mallob -- a parallel and distributed platform for job scheduling, load balancing, and SAT solving
+c Designed by P. Sanders and D. Schreiber 2018-2022
+c Developed by D. Schreiber 2019-2022
+c 
+c 0.000 0 Program options: -0o=0 -J=1 -T=60 -ajpc=0 -ans=0 -appmode=fork -ba=4 -bicg=4 -c=1 -cbbs=1500 -cbdf=0.9 -cfci=20 -cg=1 -ch=0 -chaf=5 -checksums=0 -chstms=10 -cmp=0 -colors=0 -dc=0 -delaymonkey=0 -derandomize=1 -evu=0 -fapii=0 -g=0 -h=0 -hbbfs=10 -hubfs=9999999 -huca=-1 -interface-fs=1 -interface-ipc=0 -isp=0 -jc=4 -jcl=0 -jcup=0 -jjp=0 -jwl=0 -l=1 -latencymonkey=0 -ljpc=32 -mbfsd=4 -mbt=1000000 -mcips=10 -md=0 -mid=0 -mjps=0 -mlbdps=8 -mlpt=50000000 -mmpi=0 -mono=instances/r3unknown_100k.cnf -nce=20 -p=0.01 -phasediv=1 -pls=1 -q=0 -qcll=8 -qlbdl=2 -rs=1 -rto=0 -s=1 -satsolver=L -scll=30 -seed=0 -sjd=0 -slbdl=30 -sleep=100 -t=1 -v=2 -w=-1 -wam=10000 -warmup=0 -watchdog=1 -wr=0 -y=1 -yield=0 
+c 0.001 1 [WARN] Num bounce alternatives must be at most half the number of workers!
+c 0.001 1 [WARN] Falling back to safe value r=2.
+c 0.001 2 [WARN] Num bounce alternatives must be at most half the number of workers!
+c 0.001 2 [WARN] Falling back to safe value r=2.
+c 0.001 3 [WARN] Num bounce alternatives must be at most half the number of workers!
+c 0.001 3 [WARN] Falling back to safe value r=2.
+c 0.001 0 [WARN] Num bounce alternatives must be at most half the number of workers!
+c 0.001 0 [WARN] Falling back to safe value r=2.
+c 0.002 3 Set up filesystem interface at .api/jobs.0/
+c 0.002 3 I-FS operational at .api/jobs.0/
+c 0.002 3 Set up API at src/interface/api/api_connector.hpp
+c 0.081 1 BLC insert (1,1,0.010)
+c 0.081 3 Introducing job #1 rev. 0 : r.#1:0 rev. 0 <- [3] born=0.081 hops=0 epoch=-1 => [1]
+c 0.112 0 BLC insert (1,4,1.000)
+c 1.201 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 1.201 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.00GB newreqs=3 hops=2
+c 2.201 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 2.201 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.00GB newreqs=0 hops=0
+c 3.201 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 3.201 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 4.202 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 4.202 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.35GB newreqs=0 hops=0
+c 5.202 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 5.202 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.34GB newreqs=0 hops=0
+c 6.203 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 6.203 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.34GB newreqs=0 hops=0
+c 7.203 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.34GB newreqs=0 hops=0
+c 7.203 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 8.204 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 8.204 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.34GB newreqs=0 hops=0
+c 9.204 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 9.205 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.33GB newreqs=0 hops=0
+c 10.205 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 10.205 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.33GB newreqs=0 hops=0
+c 11.205 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 11.206 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.33GB newreqs=0 hops=0
+c 12.205 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 12.206 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.33GB newreqs=0 hops=0
+c 13.206 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 13.207 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 14.207 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 14.207 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 15.207 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 15.208 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 16.208 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 16.208 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 17.208 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 17.209 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 18.208 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 18.209 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 19.209 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 19.210 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 20.209 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 20.211 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 21.210 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 21.211 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 22.210 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 22.212 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 23.211 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 23.212 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 24.211 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 24.212 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 25.212 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 25.213 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 26.212 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 26.213 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 27.213 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 27.214 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 28.213 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 28.214 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 29.214 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 29.215 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 30.214 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 30.215 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 31.215 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 31.216 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 32.215 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 32.216 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 33.215 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 33.217 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.30GB newreqs=0 hops=0
+c 34.216 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 34.217 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 35.217 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 35.218 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 36.217 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 36.218 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 37.218 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 37.219 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 38.218 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 38.219 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 39.218 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 39.220 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 40.219 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 40.220 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 41.219 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 41.220 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 42.220 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 42.221 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 43.220 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 43.221 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 44.220 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 44.222 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 45.220 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 45.222 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 46.221 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 46.223 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 47.221 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 47.224 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 48.222 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 48.224 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 49.222 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 49.225 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 50.223 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 50.225 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 51.223 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 51.226 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 52.223 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 52.226 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.31GB newreqs=0 hops=0
+c 53.223 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 53.227 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 54.224 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 54.227 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 55.224 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 55.228 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 56.224 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 56.228 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 57.225 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 57.229 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 58.225 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 58.230 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 59.226 3 sysstate entered=1 parsed=1 scheduled=1 processed=0
+c 59.230 0 sysstate busyratio=1.000 cmtdratio=0.000 jobs=1 globmem=0.32GB newreqs=0 hops=0
+c 60.000 0 Terminating.
+c 60.041 3 <#1> END S2 pps:0 dcs:0 cfs:0 rst:0 prod:0 admd:0 pfltr:0 sfltr:0 pdefr:0 drpd:0 recv:2951 rfltr:121 digd:0 defr:0 disc:0
+c 60.042 3 <#1> END S2 clenhist prod total:0 0
+c 60.042 3 <#1> END S2 clenhist digd total:0 0
+c 60.042 3 <#1> END pps:0 dcs:0 cfs:0 rst:0 prod:0 admd:0 pfltr:0 sfltr:0 pdefr:0 drpd:0 recv:2951 rfltr:121 digd:0 defr:0 disc:0
+c 60.042 3 <#1> END exp:0/0 drp:0(0.000000) dfr:0 pflt:0 sflt:0 imp:0
+c 60.042 3 <#1> clenhist prod total:0 0
+c 60.042 3 <#1> clenhist admt total:0 0
+c 60.042 3 <#1> clenhist drpd total:0 0
+c 60.042 3 <#1> clenhist dltd total:0 0
+c 60.042 3 <#1> clenhist retd total:0 0
+c 60.042 0 <#1> END S0 pps:145093526 dcs:24094983 cfs:33689 rst:0 prod:1031 admd:1006 pfltr:0 sfltr:25 pdefr:0 drpd:0 recv:2951 rfltr:980 digd:1971 defr:0 disc:0
+c 60.042 0 <#1> END S0 clenhist prod total:1031 0 0 43 134 174 157 149 175 182 14 3
+c 60.042 0 <#1> END S0 clenhist digd total:1971 0 0 62 252 313 323 341 300 336 33 9 2
+c 60.042 0 <#1> END pps:145093526 dcs:24094983 cfs:33689 rst:0 prod:1031 admd:1006 pfltr:0 sfltr:25 pdefr:0 drpd:0 recv:2951 rfltr:980 digd:1971 defr:0 disc:0
+c 60.042 0 <#1> END exp:982/1007 drp:0(0.000000) dfr:0 pflt:0 sflt:25 imp:0
+c 60.042 2 <#1> END S3 pps:158076790 dcs:3625952 cfs:63313 rst:0 prod:904 admd:883 pfltr:0 sfltr:21 pdefr:0 drpd:0 recv:2951 rfltr:870 digd:2081 defr:0 disc:0
+c 60.042 2 <#1> END S3 clenhist prod total:904 0 0 30 113 149 143 145 139 162 17 5 1
+c 60.042 2 <#1> END S3 clenhist digd total:2081 0 0 76 267 338 331 345 334 352 30 7 1
+c 60.042 2 <#1> END pps:158076790 dcs:3625952 cfs:63313 rst:0 prod:904 admd:883 pfltr:0 sfltr:21 pdefr:0 drpd:0 recv:2951 rfltr:870 digd:2081 defr:0 disc:0
+c 60.042 2 <#1> END exp:870/891 drp:0(0.000000) dfr:0 pflt:0 sflt:21 imp:0
+c 60.042 2 <#1> clenhist prod total:904 0 0 30 113 149 143 145 139 162 17 5 1
+c 60.042 0 <#1> clenhist prod total:1031 0 0 43 134 174 157 149 175 182 14 3
+c 60.042 0 <#1> clenhist admt total:1006 0 0 28 125 173 157 149 175 182 14 3
+c 60.042 0 <#1> clenhist drpd total:0 0
+c 60.042 0 <#1> clenhist dltd total:0 0
+c 60.042 0 <#1> clenhist retd total:0 0
+c 60.042 2 <#1> clenhist admt total:883 0 0 14 109 148 143 145 139 162 17 5 1
+c 60.042 2 <#1> clenhist drpd total:0 0
+c 60.042 2 <#1> clenhist dltd total:0 0
+c 60.042 2 <#1> clenhist retd total:0 0
+c 60.045 1 <#1> END S1 pps:166894783 dcs:26699607 cfs:38880 rst:0 prod:1147 admd:1126 pfltr:0 sfltr:21 pdefr:0 drpd:0 recv:2951 rfltr:1101 digd:1850 defr:0 disc:0
+c 60.045 1 <#1> END S1 clenhist prod total:1147 0 0 62 155 173 183 202 167 184 16 4 1
+c 60.045 1 <#1> END S1 clenhist digd total:1850 0 0 40 231 314 291 290 308 336 31 8 1
+c 60.045 1 <#1> END pps:166894783 dcs:26699607 cfs:38880 rst:0 prod:1147 admd:1126 pfltr:0 sfltr:21 pdefr:0 drpd:0 recv:2951 rfltr:1101 digd:1850 defr:0 disc:0
+c 60.045 1 <#1> END exp:1103/1124 drp:0(0.000000) dfr:0 pflt:0 sflt:21 imp:0
+c 60.045 1 <#1> clenhist prod total:1147 0 0 62 155 173 183 202 167 184 16 4 1
+c 60.045 1 <#1> clenhist admt total:1126 0 0 51 147 171 183 202 167 184 16 4 1
+c 60.045 1 <#1> clenhist drpd total:0 0
+c 60.045 1 <#1> clenhist dltd total:0 0
+c 60.045 1 <#1> clenhist retd total:0 0
+c 60.214 3 Exiting happily
+c 60.215 1 Exiting happily
+c 60.215 2 Exiting happily
+c 60.217 0 Exiting happily 

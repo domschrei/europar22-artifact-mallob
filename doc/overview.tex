@@ -566,14 +566,18 @@ And last but not least, to reproduce Table~2 from our paper, execute:
 scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 1\,h 20\,min\\
 reports/report-active-jobs.sh logs/realistic-\{3,1,2\}\\
 reports/report-utilization.sh logs/realistic-1\\
-reports/report-latencies.sh logs/realistic-\{1,4,5,6\}\\
+reports/report-latencies.sh logs/realistic-1\\
 reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 \end{ttfenvcompact}
 \end{tcolorbox}
 
 For shorter runs, we suggest to reduce the duration of each run to ten minutes by setting \texttt{-T=600}.
+
 For small-scale runs (Section~\ref{sec:small-setup}), prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate}, which reduces the number and size of jobs accordingly.
 In particular, we reduced the arrival rates to $1/\lambda \in \{3.\overline{3}\,s, 6.\overline{6}\,s, 13.\overline{3}\,s\}$, reduced the mean wallclock time limit per job from 300\,s to 30\,s, and slightly reduced the size of individual bursts of jobs.
+
+Furthermore, we suggest to \textbf{omit runs 4, 5, and 6} because the different behavior of these runs in terms of latencies unfortunately cannot be reproduced on such a small scale.
+The script we provide will skip these runs per default; you can force to run and display them by calling the reproduce script with option \texttt{-{}-full} and calling the \texttt{report-latencies} script with options \texttt{logs/realistic-\{1,4,5,6\}}.
 
 
 \section{Troubleshooting}

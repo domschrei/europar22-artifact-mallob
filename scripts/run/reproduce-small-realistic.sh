@@ -2,12 +2,25 @@
 
 set -e
 
+full_eval=false
+if [ ! -z $1 ]; then
+    if [ "$1" == "--full" ]; then
+        full_eval=true
+    fi
+fi
+
 cat scripts/run/configs-small-realistic.csv|while read -r line; do
 
     rno=$(echo $line|awk '{print $1}')
     clienttemplate=$(echo $line|awk '{print $2}')
     moreoptions=$(echo $line|awk '{for (i=3; i <= NF; i++) {printf("%s ", $i)}; printf("\n")}')
 
+    if ! $full_eval && ! echo $moreoptions|grep -q "\-huca=0" && echo $moreoptions|grep -q "\-huca"; then
+        echo "Skipping experiment with non-standard hops (-huca != 0)"
+        echo "To run this experiment, use option \"--full\""
+        continue
+    fi
+    
     logdir="logs/realistic-$rno"
     if [ -d $logdir ]; then
         echo "Log directory $logdir already exists - skipping this experiment"
