@@ -32,7 +32,7 @@ clienttemplate=client-template.json
 moreoptions="-dc=0 -huca=0 -rs=1"
 
 # Base Mallob command
-cmd="build/mallob -t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-$rno -v=4 -warmup -satsolver=kclkclcl -pls=0 -sjd=1 -ba=8 -job-template=instances/job-template-priorities.json -job-desc-template=instances/selection_isc2020_394.txt -client-template=instances/$clienttemplate $moreoptions"
+cmd="build/mallob -t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-$rno -v=4 -warmup -satsolver=kclkclcl -pls=0 -sjd=1 -ba=8 -job-template=instances/job-template-priorities.json -job-desc-template=instances/selection_isc2020_384.txt -client-template=instances/$clienttemplate $moreoptions"
 
 # Pre-create log directory and subdirectories for each rank:
 # This is much more efficient than letting each rank try and 

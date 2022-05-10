@@ -33,8 +33,13 @@ numclients=1
 activejobsperclient=3
 loadedjobsperclient=6
 
-# Base Mallob command
+# Create job template file as necessary
 jobtemplate=templates/job-template-sat-r3unknown_100k-${coreminperjob}coremin.json
+if [ ! -f $jobtemplate ]; then
+    cat templates/job-template-sat-r3unknown_100k.json|sed 's/CPUMINUTES/'$coreminperjob'/g' > $jobtemplate
+fi
+
+# Base Mallob command
 cmd="build/mallob -t=1 -q -c=$numclients -ajpc=$activejobsperclient -ljpc=$loadedjobsperclient -T=320 -log=logs/uniform-$npar -v=4 -warmup -job-template=$jobtemplate"
 
 # Pre-create log directory and subdirectories for each rank:

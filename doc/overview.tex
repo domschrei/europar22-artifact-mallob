@@ -323,13 +323,15 @@ Define the referenced shell variables as follows for the different runs:\\
 
 \vspace{0.4cm}
 
-Then define \texttt{\$jobtemplate} as follows:
+We instantiate a job template file and define \texttt{\$jobtemplate} as follows:
 
 \begin{ttfenv}
-jobtemplate=templates/job-template-sat-r3unknown\_100k-\$\{coreminperjob\}coremin.json
+jobtemplate=templates/job-template-sat-r3unknown\_100k-\$\{coreminperjob\}coremin.json\\
+sed 's/CPUMINUTES/'\$coreminperjob'/g' templates/job-template-sat-r3unknown\_100k.json \CR\\
+> \$jobtemplate
 \end{ttfenv}
 
-N.B.: As can be seen, the more jobs we process in parallel, the more PEs we configure to introduce jobs (``clients'').
+N.B.: The more jobs we process in parallel, the more PEs we configure to introduce jobs (``clients'').
 This is done in order to prevent a single client to become a bottleneck for introducing jobs.
 As such, we can focus on the decentralized scheduling capabilities of our system.
 %We have not yet tested the behaviour of our platform if we employ only a single client for hundreds of parallel jobs.
@@ -501,7 +503,7 @@ Use the following base options for Mallob:
 -t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-\$rno -v=4 -warmup \CR\\
 -satsolver=kclkclcl -pls=0 -sjd=1 -ba=8  \CR\\
  -job-template=instances/job-template-priorities.json  \CR\\
- -job-desc-template=instances/selection\_isc2020\_394.txt  \CR\\
+ -job-desc-template=instances/selection\_isc2020\_384.txt  \CR\\
  -client-template=instances/\$clienttemplate
 \end{ttfenv}
 
