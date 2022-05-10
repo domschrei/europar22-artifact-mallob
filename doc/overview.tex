@@ -94,8 +94,8 @@
 
 This document serves as a documentation on the software artifact associated with our Euro-Par 2022 publication (named as above).
 In particular, we describe how to build and run our scheduling platform Mallob and how to reproduce our experiments.
-As our research was conducted on a large configuration (1536--6144 cores) of a commodity cluster with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame ($<3$\,h in total).
-As such, our experiments can be simulated on a much smaller scale with similar results on a qualitative level.
+As our research was conducted on a large configuration (1536--6144 cores) of a commodity cluster with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame ($<2.5$\,h in total).
+As such, much simpler and less costly experiments can be run while reproducing many of our results (albeit on much smaller scale).
 
 
 
@@ -483,6 +483,7 @@ This set of experiments corresponds to Section~5.3 from our paper.
 We configure a number of clients which introduce jobs from a wide variety of SAT problems at poisson-distributed arrival rates and random priorities and budgets.
 
 \subsubsection{Original Setup}
+\label{sec:realistic-original}
 
 \begin{tcolorbox}[
   colback=Magenta!5!white,
@@ -490,7 +491,7 @@ We configure a number of clients which introduce jobs from a wide variety of SAT
   title={\centering In a Nutshell: Commands for Original Setup}]
 \begin{ttfenvcompact}
 for f in sbatch/realistic-*.sh; do sbatch \$f; done\ \ \ \# wait until finished!\\
-reports/report-active-jobs.sh logs/realistic-\{3,1,2\}\\
+reports/report-active-jobs.sh logs/realistic-\{2,1,3\}\\
 reports/report-utilization.sh logs/realistic-1\\
 reports/report-latencies.sh logs/realistic-\{1,4,5,6\}\\
 reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
@@ -544,17 +545,25 @@ To output plots as in Fig.~5 in our paper, use these commands:
  bash reports/report-utilization.sh logs/realistic-1
 \end{verbatim}
 Both commands will output a graph which should be similar to the plots in the paper.
+The plot featuring the number of active jobs is more of a coarse sanity check; the number of active jobs should fluctuate considerably over time and should be highest for run 2 and lowest for run 3.
+The utilization plot should reveal that consistently high utilization is achieved, namely 99\% or more.
+If utilization drops at certain points, this may mean that the present jobs in the system are not capable of employing all present PEs ($\sum_j d_j < m$).
+In that case, the number of active jobs at that point in time should be very low.
 
 Similarly, to reproduce Fig.~6 from our paper, execute:
 \begin{verbatim}
  bash reports/report-latencies.sh logs/realistic-{1,4,5,6}
 \end{verbatim}
+For tree growth and initial scheduling latencies, we expect consistently low latencies for run 1 (< 10\,ms almost always) and higher worst-case latencies the higher $h$ is chosen.
+Our script also outputs the balancing latencies (not included in the paper) which should be around the same for all runs.
 
 And last but not least, to reproduce Table~2 from our paper, execute:
 \begin{verbatim}
  bash reports/report-worker-reuse.sh logs/realistic-{7,8,1}
 \end{verbatim}
-
+Run 1 (``Ours'') should generally lead to the best performance, although the margin in terms of mean reponse times and processed jobs may be small or non-existent.
+In particular, a considerable improvement in terms of Context Creation Ratio (CCR) and context switches (CS) should be discernible.
+The final five values should be monotonically increasing and the final value should be very close to 1.
 
 \subsubsection{Small Setup}
 
@@ -563,9 +572,9 @@ And last but not least, to reproduce Table~2 from our paper, execute:
   colframe=Magenta!75!black,
   title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 1\,h 20\,min\\
-reports/report-active-jobs.sh logs/realistic-\{3,1,2\}\\
-reports/report-utilization.sh logs/realistic-1\\
+scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 50\,min\\
+reports/report-active-jobs.sh logs/realistic-\{2,1,3\}\\
+reports/report-utilization.sh logs/realistic-\{1,2\}\\
 reports/report-latencies.sh logs/realistic-1\\
 reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 \end{ttfenvcompact}
@@ -576,9 +585,17 @@ For shorter runs, we suggest to reduce the duration of each run to ten minutes b
 For small-scale runs (Section~\ref{sec:small-setup}), prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate}, which reduces the number and size of jobs accordingly.
 In particular, we reduced the arrival rates to $1/\lambda \in \{3.\overline{3}\,s, 6.\overline{6}\,s, 13.\overline{3}\,s\}$, reduced the mean wallclock time limit per job from 300\,s to 30\,s, and slightly reduced the size of individual bursts of jobs.
 
-Furthermore, we suggest to \textbf{omit runs 4, 5, and 6} because the different behavior of these runs in terms of latencies unfortunately cannot be reproduced on such a small scale.
+We suggest to \textbf{omit runs 4, 5, and 6} because the different behavior of these runs in terms of latencies unfortunately cannot be reproduced on such a small scale.
 The script we provide will skip these runs per default; you can force to run and display them by calling the reproduce script with option \texttt{-{}-full} and calling the \texttt{report-latencies} script with options \texttt{logs/realistic-\{1,4,5,6\}}.
 
+Overall, results will look differently on this small scale because individual variations of single jobs have a much higher impact than in our large setup where the Law of Large Numbers is in effect.
+You should be able to reproduce the same qualitative results in terms of active jobs over time, albeit with higher fluctuation due to fewer jobs.
+Also, you should be able to observe consistent reasonably high utilization ($\approx 99\%$) at least for run 2.
+The relatively higher fluctuation on this small scale leads to lower utilization on average due to frequent re-scheduling, and, especially for lower $1/\lambda$, may lead to time intervals where not all PEs can be employed (see Section~\ref{sec:realistic-original}).
+The latencies reported by the respective plots for run 1 should be similarly low as in our distributed setup (or lower).
+However, the latency differences of different request matching strategies cannot be reproduced (see above).
+In terms of worker reuse, you should still be able to discern improvements in terms of CCR and CS for our approach over the other two approaches.
+The absolute values for CCR and CS should be lower (since a single job should experience less rescheduling relatively, compared to a large system) whereas we expect the values for Pr[$\cdot$] to increase more quickly than in our paper -- in our own small scale experiments, no worker was rescheduled five or more times.
 
 \section{Troubleshooting}
 
@@ -608,7 +625,7 @@ Check the following points:
 Administration and monitoring tasks such as \texttt{ssh}, \texttt{htop}, or \texttt{tail -f} are usually fine, but computationally heavy tasks which make full use of one or multiple hardware threads are not.
 \end{itemize}
 
-If you check your local system's utilization while running Mallob, e.g., using \texttt{htop}, it should look something like this:
+If you check your local system's utilization while running Mallob, e.g., using \texttt{htop}, it should look something like this (coloring changed for better visibility):
 \begin{center}
 \includegraphics[width=\textwidth]{../sample-output/htop-32cores.png}
 \end{center}
