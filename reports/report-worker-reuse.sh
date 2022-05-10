@@ -39,6 +39,8 @@ for d in $@ ; do
     else
         label="Ours"
     fi
+
+    mkdir -p $d/data
         
     # Extract worker events from logs (this may take a minute)
     cat $d/*/log.*|grep -E ":0 : update v=|LOAD 1" > $d/data/worker_events

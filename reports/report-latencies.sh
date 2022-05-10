@@ -20,6 +20,8 @@ for d in $@ ; do
     # Extract "hops" option
     huca=$(echo $options|grep -oE " -huca=[0-9-]+ "|grep -oE "[0-9-]+")
     
+    mkdir -p $d/data
+    
     # Sort balancing and treegrowth latencies
     for l in balancing treegrowth; do 
         cat $d/*/*${l}*|sort -g > $d/data/${l}-latencies 
