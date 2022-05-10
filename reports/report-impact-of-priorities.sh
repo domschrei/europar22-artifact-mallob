@@ -24,9 +24,9 @@ lastclient=$(echo */|tr ' ' '\n'|grep -E '^[0-9]+/$'|sort -g|tail -1|sed 's,/,,g
 firstclient=$(($lastclient - $numclients + 1))
 
 # Gather the used priorities
-echo "Prio" > data/priorities/priorities
+echo "Prio" > data/priorities
 for i in $(seq 0 $(($numclients-1))); do
-    cat "${calldir}/templates/job-template-priorities.json.$i"|grep priority|grep -oE "[0-9\.]+" >> data/priorities/priorities
+    cat "${calldir}/templates/job-template-priorities.json.$i"|grep priority|grep -oE "[0-9\.]+" >> data/priorities
 done
 
 echo "$numclients priority streams found."
@@ -36,7 +36,7 @@ echo "$numclients priority streams found."
 # over time. In the end, we aggregate for each stream the
 # average assigned volume for all jobs in the stream, 
 # weighted by the jobs' run times.
-echo "MeanVol" > data/priorities/volumes
+echo "MeanVol" > data/volumes
 cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk '{\
  t=$1; id=$2; v=$4; \
  if (lastvol[id] != 0 && t > lasttime[id]) {\
@@ -55,10 +55,10 @@ cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk 
   T[stream] += t;\
  }\
  for (stream in V) {print V[stream]}\
-}' >> data/priorities/volumes
+}' >> data/volumes
 
 # Collect response times for each stream
-echo "MeanRT[s]" > data/priorities/times
+echo "MeanRT[s]" > data/times
 for rank in $(seq $firstclient $lastclient); do
     cat $rank/log.*|grep RESPONSE_TIME|awk '{print $4,$5}'|sed 's/#//g'|awk '\
     {\
@@ -70,13 +70,13 @@ for rank in $(seq $firstclient $lastclient); do
     } END {\
      print((sums + (80-nums)*300) / 80)\
     }'
-done >> data/priorities/times
+done >> data/times
 
-paste data/priorities/{priorities,volumes,times} |column -t
+paste data/{priorities,volumes,times} |column -t
 
 # Create files for plotting
-paste data/priorities/{priorities,volumes} > data/priorities/volume_per_prio
-paste data/priorities/{priorities,times} > data/priorities/time_per_prio
+paste data/{priorities,volumes} > data/volume_per_prio
+paste data/{priorities,times} > data/time_per_prio
 
 # Plot
 cd "$calldir"
