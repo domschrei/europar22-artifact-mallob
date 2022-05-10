@@ -11,6 +11,13 @@ cat scripts/run/configs-small-uniform.csv|while read -r line; do
     loadedjobsperclient=$(echo $line|awk '{print $5}')
     jobtemplate=templates/job-template-sat-r3unknown_100k-${coreminperjob}coremin.json
     
+    logdir="logs/uniform-$npar"
+    if [ -d $logdir ]; then
+        echo "Log directory $logdir already exists - skipping this experiment"
+        echo "To re-run the experiment, run: rm -rf \"$logdir\""
+        continue
+    fi
+    
     if [ ! -f $jobtemplate ]; then
         cat templates/job-template-sat-r3unknown_100k.json|sed 's/CPUMINUTES/'$coreminperjob'/g' > $jobtemplate
     fi
@@ -18,7 +25,7 @@ cat scripts/run/configs-small-uniform.csv|while read -r line; do
     echo "******************************************************"
     echo "Running experiment: npar=$npar coreminperjob=$coreminperjob numclients=$numclients activejobsperclient=$activejobsperclient loadedjobsperclient=$loadedjobsperclient"
     
-    PATH=build:$PATH RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 -q -c=$numclients -ajpc=$activejobsperclient -ljpc=$loadedjobsperclient -T=320 -log=logs/uniform-$npar -v=4 -warmup -job-template=$jobtemplate 2>&1 > OUT < /dev/null
+    PATH=build:$PATH RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 -q -c=$numclients -ajpc=$activejobsperclient -ljpc=$loadedjobsperclient -T=320 -log=$logdir -v=4 -warmup -job-template=$jobtemplate 2>&1 > OUT < /dev/null
     
     echo "Experiment done"
     echo "******************************************************"
