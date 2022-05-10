@@ -25,7 +25,8 @@ firstclient=$(($lastclient - $numclients + 1))
 # Calculate the number of parallel jobs
 npar=$(($numclients * $ajpc))
 
-echo "1st client directory: $firstclient"
+echo "******************************************************"
+echo "Log directory: $basedir (npar=$npar)"    
 
 # Extract the required warmup time until Mallob was set up to take jobs
 warmuptime=$(cat "$firstclient"/log.*|grep "I am worker"|head -1|awk '{print $1}')
@@ -53,3 +54,5 @@ cpuratio=$(cat */subproc.*|grep cpuratio|grep -v child_main|grep -oE "cpuratio=[
 grep -oE "[0-9\.]+"|awk '{r=$1>1?1:$1; s+=r; c+=1} END {print s/c}')
 
 echo "Mean measured CPU utilization of worker threads: $cpuratio"
+echo "******************************************************"
+echo ""
