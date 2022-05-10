@@ -10,7 +10,9 @@ if [ ! -d "$basedir" ]; then
 fi
 
 calldir="$(pwd)"
-cd "$basedir" 
+cd "$basedir"
+
+mkdir -p data
 
 # Extract program options from logs of rank zero
 options=$(cat 0/log.0|head -10|grep "Program options")
@@ -22,9 +24,9 @@ lastclient=$(echo */|tr ' ' '\n'|grep -E '^[0-9]+/$'|sort -g|tail -1|sed 's,/,,g
 firstclient=$(($lastclient - $numclients + 1))
 
 # Gather the used priorities
-echo "Prio" > _i_o_p_priorities
+echo "Prio" > data/priorities/priorities
 for i in $(seq 0 $(($numclients-1))); do
-    cat "${calldir}/templates/job-template-priorities.json.$i"|grep priority|grep -oE "[0-9\.]+" >> _i_o_p_priorities
+    cat "${calldir}/templates/job-template-priorities.json.$i"|grep priority|grep -oE "[0-9\.]+" >> data/priorities/priorities
 done
 
 echo "$numclients priority streams found."
@@ -34,7 +36,7 @@ echo "$numclients priority streams found."
 # over time. In the end, we aggregate for each stream the
 # average assigned volume for all jobs in the stream, 
 # weighted by the jobs' run times.
-echo "MeanVol" > _i_o_p_volumes
+echo "MeanVol" > data/priorities/volumes
 cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk '{\
  t=$1; id=$2; v=$4; \
  if (lastvol[id] != 0 && t > lasttime[id]) {\
@@ -53,10 +55,10 @@ cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk 
   T[stream] += t;\
  }\
  for (stream in V) {print V[stream]}\
-}' >> _i_o_p_volumes
+}' >> data/priorities/volumes
 
 # Collect response times for each stream
-echo "MeanRT[s]" > _i_o_p_times
+echo "MeanRT[s]" > data/priorities/times
 for rank in $(seq $firstclient $lastclient); do
     cat $rank/log.*|grep RESPONSE_TIME|awk '{print $4,$5}'|sed 's/#//g'|awk '\
     {\
@@ -68,7 +70,14 @@ for rank in $(seq $firstclient $lastclient); do
     } END {\
      print((sums + (80-nums)*300) / 80)\
     }'
-done >> _i_o_p_times
+done >> data/priorities/times
 
-paste _i_o_p_priorities _i_o_p_volumes _i_o_p_times|column -t
+paste data/priorities/{priorities,volumes,times} |column -t
 
+# Create files for plotting
+paste data/priorities/{priorities,volumes} > data/priorities/volume_per_prio
+paste data/priorities/{priorities,times} > data/priorities/time_per_prio
+
+# Plot
+cd "$calldir"
+reports/plot-impact-of-priorities.sh $@
