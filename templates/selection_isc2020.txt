@@ -77,4 +77,4 @@ instances/8-5-6.cnf
 instances/apn-sbox6-cut4-helpbox26.cnf
 instances/course0.2_2018_3-sc2018.cnf
 instances/cz-alt-3-7.cnf
-instances/SocialGolfers-6-6-6-cp_c18.cnf 
+instances/SocialGolfers-6-6-6-cp_c18.cnf

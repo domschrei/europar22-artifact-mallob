@@ -6,7 +6,7 @@ logdir="logs/priorities"
 if [ -d $logdir ]; then
     echo "Log directory $logdir already exists - skipping this experiment"
     echo "To re-run the experiment, run: rm -rf \"$logdir\""
-    continue
+    exit 0 
 fi
 
 echo "******************************************************"
