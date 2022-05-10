@@ -63,7 +63,7 @@ instances/SGI_30_70_20_60_10-dir.shuffled-as.sat03-144.cnf
 instances/f6bidw.cnf
 instances/fsf-300-354-2-2-3-2.23.opt.cnf
 instances/jkkk-one-one-10-30-unsat.cnf
-instances/simon03:sat02bis:k2fix_gr_2pinvar_w8.used-as.sat04-349.cnf
+instances/k2fix_gr_2pinvar_w8.shuffled.cnf
 instances/prime2209-84.cnf
 instances/ccp-s8-facto4.cnf
 instances/crafted_n12_d6_c4_num9.cnf
