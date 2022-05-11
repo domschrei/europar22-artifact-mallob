@@ -24,7 +24,7 @@ lastclient=$(echo */|tr ' ' '\n'|grep -E '^[0-9]+/$'|sort -g|tail -1|sed 's,/,,g
 firstclient=$(($lastclient - $numclients + 1))
 
 # Gather the used priorities
-echo "Prio" > data/priorities
+echo "Prio" > data/priorities # header for the table we will output in the end
 for i in $(seq 0 $(($numclients-1))); do
     cat "${calldir}/templates/job-template-priorities.json.$i"|grep priority|grep -oE "[0-9\.]+" >> data/priorities
 done
@@ -36,7 +36,7 @@ echo "$numclients priority streams found."
 # over time. In the end, we aggregate for each stream the
 # average assigned volume for all jobs in the stream, 
 # weighted by the jobs' run times.
-echo "MeanVol" > data/volumes
+echo "MeanVol" > data/volumes # header for the table we will output in the end
 cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk '{\
  t=$1; id=$2; v=$4; \
  if (lastvol[id] != 0 && t > lasttime[id]) {\
@@ -58,7 +58,7 @@ cat */log.*|grep ":0 : update v="|awk '{print $1,$3,$6}'|sed 's/[#:v=]/ /g'|awk 
 }' | sort -g | awk '{print $2}' >> data/volumes
 
 # Collect response times for each stream
-echo "MeanRT[s]" > data/times
+echo "MeanRT[s]" > data/times # header for the table we will output in the end
 for rank in $(seq $firstclient $lastclient); do
     cat $rank/log.*|grep RESPONSE_TIME|awk '{print $4,$5}'|sed 's/#//g'|awk '\
     {\

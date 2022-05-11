@@ -1,0 +1,71 @@
+
+# 1.1 Prerequisites
+
+sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils build-essential cmake wget gdb gawk
+
+# 1.2 Building Mallob
+
+( cd lib && bash fetch_and_build_jemalloc.sh )
+( cd lib && bash fetch_and_build_sat_solvers.sh )
+mkdir -p build; cd build
+CC=$(which mpicc) CXX=$(which mpicxx) cmake -DCMAKE_BUILD_TYPE=RELEASE -DMALLOB_USE_JEMALLOC=1 -DMALLOB_LOG_VERBOSITY=4 -DMALLOB_ASSERT=1 -DMALLOB_JEMALLOC_DIR=lib/jemalloc-5.2.1/lib ..
+make; cd ..
+
+# 1.3 Fetching Benchmarks
+
+( cd instances && bash fetch_sat2020_instances.sh )
+
+# 1.4 Test Run
+
+PATH="build:$PATH" RDMAV_FORK_SAFE=1 mpirun -np 4 build/mallob -T=60 -mono=instances/r3unknown_100k.cnf
+
+# 1.5 On Producing Plots
+
+sudo apt install python3-matplotlib
+
+# 2.1 Original Setup
+
+PATH="build:$PATH" RDMAV_FORK_SAFE=1 srun -n $SLURM_NTASKS build/mallob $options
+
+# 2.2 Small Setup
+
+PATH="build:$PATH" RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 $options
+
+# 2.3.1 Uniform Jobs / Original Setup
+
+for f in sbatch/uniform-*.sh; do sbatch $f; done
+for d in logs/uniform-*; do reports/report-uniform-jobs.sh $d; done
+
+jobtemplate=templates/job-template-sat-r3unknown_100k-${coreminperjob}coremin.json
+sed 's/CPUMINUTES/'$coreminperjob'/g' templates/job-template-sat-r3unknown_100k.json > $jobtemplate
+
+# 2.3.2 Uniform Jobs / Short / Small Setup
+
+scripts/run/reproduce-small-uniform.sh
+for d in logs/uniform-*; do reports/report-uniform-jobs.sh $d; done
+
+# 2.4.1 Impact of Priorities / Original Setup
+
+sbatch sbatch/priorities.sh
+reports/report-impact-of-priorities.sh logs/priorities
+
+# 2.4.2 Impact of Priorities / Short / Small Setup
+
+scripts/run/reproduce-small-priorities.sh
+reports/report-impact-of-priorities.sh logs/priorities
+
+# 2.5.1 Realistic Arrivals / Original Setup
+
+for f in sbatch/realistic-*.sh; do sbatch $f; done
+reports/report-active-jobs.sh logs/realistic-{2,1,3}
+reports/report-utilization.sh logs/realistic-1
+reports/report-latencies.sh logs/realistic-{1,4,5,6}
+reports/report-worker-reuse.sh logs/realistic-{7,8,1}
+
+# 2.5.2 Realistic Arrivals / Short / Small Setup
+
+scripts/run/reproduce-small-realistic.sh
+reports/report-active-jobs.sh logs/realistic-{2,1,3}
+reports/report-utilization.sh logs/realistic-{1,2}
+reports/report-latencies.sh logs/realistic-1
+reports/report-worker-reuse.sh logs/realistic-{7,8,1}

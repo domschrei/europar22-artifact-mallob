@@ -101,6 +101,17 @@ As such, much simpler and less costly experiments can be run while reproducing m
 
 
 
+\begin{tcolorbox}[
+  colback=Magenta!5!white,
+  colframe=Magenta!75!black,
+  title={\centering Commands and Scripts}]
+For your convenience, all commands featured in this document can be found in raw text form in \texttt{doc/document-commands.txt}.
+Where appropriate, we provide fully automated scripts which are then highlighted in boxes like this.
+In particular, the scripts which run individual experiments are meant to be well comprehensible and, if desired, provide additional insights.
+\end{tcolorbox}
+
+
+
 
 
 \section{Getting Started}
@@ -161,7 +172,7 @@ After these steps, copy the directory structure to the cluster.
 On the cluster, follow the usual build procedure, calling again \texttt{fetch\_and\_build\_...} where you previously only called \texttt{fetch\_...}.
 \fi
 
-\subsection{Fetch Benchmarks}
+\subsection{Fetching Benchmarks}
 
 In our experiments, we use benchmarks from the International SAT Competition 2020.
 You can fetch them with the following command:
@@ -181,11 +192,14 @@ Make sure that \texttt{./reports/} and \texttt{./templates/} are valid paths as 
 To test that everything functions correctly, perform this basic ``sanity check'' for your Mallob environment:
 
 \begin{ttfenv}
-PATH=build:\$PATH RDMAV\_FORK\_SAFE=1 mpirun -np 4 build/mallob -T=60 \CR\\
+PATH=``build:\$PATH RDMAV\_FORK\_SAFE=1'' mpirun -np 4 build/mallob -T=60 \CR\\
 -mono=instances/r3unknown\_100k.cnf
 \end{ttfenv}
 
-This should process a single SAT formula with four MPI processes (i.e., four workers) for 60 seconds and then exit unsuccessfully. (Exiting with a solution would be a very lucky outcome in this case.)
+Note that we set two environment variables for Mallob: \texttt{PATH=``build:\$PATH''}, which assures that the solver sub-process can be executed, and \texttt{RDMAV\_FORK\_SAFE=1}, which allows MPI applications to spawn (non-MPI) sub-processes without memory corruption.
+
+The above command should process a single SAT formula with four MPI processes (i.e., four workers) for 60 seconds and then exit unsuccessfully. (Exiting with a solution would be a very lucky outcome in this case.)
+You can compare the output with the sample output we provide in \texttt{sample-output/testrun.txt}.
 
 \subsection{On Producing Plots}
 \label{sec:plots}
@@ -206,7 +220,7 @@ You can then plot the data by calling the respective scripts \texttt{reports/plo
 
 We use a custom Python script for plotting data.
 You find how it is called in the files \texttt{reports/plot-*.sh}.
-You can modify each call to your liking.
+You can modify each call to this Python script to your liking.
 Most importantly, you can set the visualized bounding box of the plot with the options \texttt{-xmin=/-xmax=/-ymin=/-ymax=}, and you can output the plot into a PDF file using \texttt{-o=path/to/output.pdf}.
 
 
@@ -227,11 +241,11 @@ Most importantly, you can set the visualized bounding box of the plot with the o
 In the following, we explain how each of our experiments needs to be set up and how results can be retrieved.
 For each set of experiments, we provide two different sets of instructions: How to run our original experiments (``Original Setup''), and how to run a shorter suite of experiments on a single machine (``Small Setup'').
 We first describe these two setups in general and then explain how each of our evaluation sections can be reproduced with both setups.
-
-We provide highlighted boxes at the beginning of each subsection which feature the quick and easy commands to execute for running the experiments and showing the results.
-The instructions below the boxes offer more detailed instructions on how to set up, run, and analyze the experiments oneself.
+For our original setup we refer to our original paper for reference results.
+For our small setup we provide reference results in \texttt{sample-output/}.
 
 \subsection{Original Setup}
+\label{sec:original-setup}
 
 For documentation purposes, we describe the exact setup we have used for our experiments.
 We used up to 128 ``thin'' compute nodes of SuperMUC-ng\footnote{https://doku.lrz.de/display/PUBLIC/Hardware+of+SuperMUC-NG}.
@@ -253,31 +267,45 @@ In addition to the base installation on SuperMUC-ng, we have loaded the followin
 SuperMUC-ng runs the SLURM workload manager, which is a centralized scheduling system.
 Jobs in SLURM are described via a script file with special \textit{SLURM directives} which describe the kind of deployment, the scale, maximum processing time, and other meta data.
 Jobs are then submitted to SLURM via the command \texttt{sbatch \$file}.
-We provide SLURM script files equivalent to the ones we have used to submit our jobs.
-However, depending on the system available to you, \textbf{it is likely that you need to modify these files} -- please consult the documentation for your compute cluster.
+Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs.
+The SLURM directives for our experiments look like this:
+\begin{ttfenv}
+\#SBATCH -t 00:06:00\\
+\#SBATCH --nodes=128\\
+\#SBATCH --ntasks-per-node=12\\
+\#SBATCH --cpus-per-task=8\\
+\#SBATCH --ntasks-per-core=2
+\end{ttfenv}
+The first two directives specify the maximum run time and the number of nodes (machines) of the experiment.
+The third, fourth, and fifth directive describe how we subdivide each node into a number of MPI processes (``tasks'') with four cores, i.e., eight hardware threads, each.
+Depending on the particular system available to you, \textbf{it is likely that you need to modify or extend these files}.
+In particular, you may arrive at a different number of MPI processes per node (twelve in our case) depending on the cores available per machine.
+Please consult the documentation for your compute cluster.
+Our \texttt{sbatch} scripts then load the environment modules listed above, create logging directories in advance (since this is more efficient than having all MPI processes create their own log directory at the same time), and execute Mallob as follows:
+\begin{ttfenv}
+PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 \textbf{srun} -n \$SLURM\_NTASKS build/mallob \$options
+\end{ttfenv}
 
-We used commit \texttt{a316fb6f4dee55d2d3aa0a61686043f4d7836086} from the \texttt{interface} branch of Mallob\footnote{https://github.com/domschrei/mallob} (the same repository state we also include in this artifact).
 
 \subsection{Small Setup}
 \label{sec:small-setup}
 
 If you intend to run Mallob on a single shared-memory machine with interactive access, you can call \texttt{mpirun} or \texttt{mpiexec} directly instead of the above procedure involving SLURM.
-The SLURM directives we use roughly correspond to the following \texttt{mpirun} command when using OpenMPI:
+We provide our small-scale experiments with Open MPI in mind, since this is open source software which should be available to everyone.
+The SLURM configuration provided above roughly corresponds to this \texttt{mpirun} command:
 
 \begin{ttfenv}
- mpirun -np \$numprocesses --map-by numa:PE=4 --bind-to core \$command
+mpirun -np \$numprocesses --map-by numa:PE=4 --bind-to core \$command
 \end{ttfenv}
 
-This setup should assign four physical cores (eight hardware threads) to each MPI process.
-For some experiments you may want to increase the number of MPI processes in order to observe more fine-grained scheduling: In that case, use the directive \texttt{numa:PE=1} instead and set the program option \texttt{-t=1} in Mallob.
+This setup assigns four physical cores (eight hardware threads) to each MPI process.
+To maximize scheduling effects on a small scale, we suggest to increase the number of MPI processes in order to observe more fine-grained scheduling: 
+Use the directive \texttt{numa:PE=1} instead and set the program option \texttt{-t=1} in Mallob.
 As such you can quadruple the number of MPI processes while giving each solver process only one instead of four cores.
-This tweak is generally possible for all of our experiments, at the price of worse performance in terms of job processing.
-
-Two environment variables must be set for Mallob: \texttt{PATH=build:\$PATH}, which assures that the solver sub-process can be executed, and \texttt{RDMAV\_FORK\_SAFE=1}, which allows MPI applications to spawn (non-MPI) sub-processes without memory corruption.
-All in all, for a single machine with 32 cores and 64 hardware threads, we suggest to run the following command:
+Therefore, for a single machine with 32 cores and 64 hardware threads, we suggest to run the following command:
 
 \begin{ttfenv}
-PATH=build:\$PATH RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bind-to core \CR\\
+PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bind-to core \CR\\
 build/mallob -t=1 \$options
 \end{ttfenv}
 
@@ -305,23 +333,15 @@ All processes (including clients) participate in job scheduling and processing.
 \begin{tcolorbox}[
   colback=Magenta!5!white,
   colframe=Magenta!75!black,
-  title={\centering In a Nutshell: Commands for Original Setup}]
+  title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
 for f in sbatch/uniform-*.sh; do sbatch \$f; done\ \ \# wait until finished!\\
 for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
 \end{tcolorbox}
 
-This section involves \textbf{nine experiments} which take around \textbf{six minutes each}.
-For each one, we use the following SLURM directives to allocate 128 machines with 48 physical cores (96 hardware threads) each, using eight hardware threads (four physical cores) for each MPI process (``task''):
-\begin{verbatim}
-#SBATCH --nodes=128
-#SBATCH --ntasks-per-node=12
-#SBATCH --cpus-per-task=8
-#SBATCH --ntasks-per-core=2
-#SBATCH -t 00:06:00
-\end{verbatim}
-
+This section involves \textbf{nine experiments} which take \textbf{six minutes each}.
+For each one, we allocate 128 machines configured as in Section~\ref{sec:original-setup}.
 We use the following command-line arguments for Mallob:
 
 \begin{ttfenv}
@@ -367,12 +387,12 @@ Running the script as indicated above, you should obtain a number of measures wh
 The different efficiencies reported ($\theta/\theta_{\text{opt}}$, $\eta$, and $u$) should be close to one (>97\%) for all experiments.
 If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we expect that the lowest values are reported for the two extreme cases and that better values are reported in between.
 
-\subsubsection{Small Setup}
+\subsubsection{Short / Small Setup}
 
 \begin{tcolorbox}[
   colback=Magenta!5!white,
   colframe=Magenta!75!black,
-  title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
+  title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
 scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for 36\,min \\
 for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
@@ -380,9 +400,11 @@ for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
 \end{tcolorbox}
 
 For our ``Small Setup'' (Section~\ref{sec:small-setup}) with 32 cores, we suggest to divide the CPU time allotted to each job by $6144/32=$\,\textbf{192}.
-Furthermore, due to these changes we suggest to adjust the runs as provided in the below table.
+Due to these changes we suggest to adjust the runs as provided in the below table.
 (Note that $n_{\text{par}}$ must not exceed the number of MPI processes for your particular setup.)
-We expect the same qualitative results on such a smaller scale.\\
+
+We expect the same qualitative results on such a smaller scale.
+To compare your output with the output we observed, see \texttt{sample-output/uniform-jobs/report.txt}.\\
 
 {
 \begin{tabular}{|r|r|r|r|r|}
@@ -416,20 +438,14 @@ Again, all MPI processes participate in job scheduling and processing, and our j
 \begin{tcolorbox}[
   colback=Magenta!5!white,
   colframe=Magenta!75!black,
-  title={\centering In a Nutshell: Commands for Original Setup}]
+  title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
 sbatch sbatch/priorities.sh\ \ \ \# wait until finished!\\
 reports/report-impact-of-priorities.sh logs/priorities
 \end{ttfenvcompact}
 \end{tcolorbox}
 
-We use the following SLURM directives to use 32 machines for \textbf{up to six hours} (see below for how to reduce execution time) with an otherwise identical configuration to the one from Section~\ref{sec:uniform-jobs}:
-
-\begin{verbatim}
-#SBATCH --nodes=32
-#SBATCH -t 06:00:00
-\end{verbatim}
-
+We use \textbf{32 machines} for \textbf{six hours} (see below for how to reduce execution time) with an otherwise identical configuration to the one from Section~\ref{sec:uniform-jobs}.
 We use the following command line arguments:
 
 \begin{ttfenv}
@@ -439,21 +455,26 @@ We use the following command line arguments:
 \end{ttfenv}
 
 The script \texttt{reports/report-impact-of-priorities.sh} should recognize automatically how many streams with which priorities have been used.
-The script should output a plain text table similar to the table in Fig. 4 (right) in the paper.
+The script outputs a plain text table and a plot, similar to Fig. 4 in our paper.
 Check that the mean assigned volume grows proportional to the assigned priority, except for rounding offsets.
 Response times should improve (i.e., decrease) for growing priorities.
 
-\subsubsection{Small Setup}
+\subsubsection{Short / Small Setup}
 
 \begin{tcolorbox}[
   colback=Magenta!5!white,
   colframe=Magenta!75!black,
-  title={\centering Commands for Small Setup (Section~\ref{sec:small-setup}) in a Nutshell}]
+  title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
 scripts/run/reproduce-small-priorities.sh\ \ \ \# runs for 1\,h\\
 reports/report-impact-of-priorities.sh logs/priorities
 \end{ttfenvcompact}
 \end{tcolorbox}
+
+To reduce the run time of the experiment, we suggest to reduce the wallclock time limit per job from 300\,s down to 60\,s.
+To achieve this, we set \texttt{-jwl=60}.
+As such we can reduce the overall run time to one hour (\texttt{-T=3600}).
+Note, however, that this setup leads to less pronounced differences between the individual job streams' performances.
 
 On 32 cores (Section~\ref{sec:small-setup}), we suggest to reduce the number $k$ of parallel streams to four in order to obtain meaningful differences in the jobs' volumes.
 For this means, set the Mallob command line option \texttt{-c=4}.
@@ -463,10 +484,7 @@ In general, to adjust the number $k$ of streams and the values of priorities, ed
 
 \texttt{templates/job-template-priorities.json.\$i}, where $i \in \{0,\ldots,k-1\}$, and replace the value under the key \texttt{"priority"}, and set $k$ as above. 
 
-To reduce the run time of the experiment, we suggest to reduce the wallclock time limit per job from 300\,s down to 60\,s, which reduces the overall run time to one hour.
-To achieve this, set the Mallob command line option \texttt{-jwl=60}.
-Note, however, that this setup leads to less pronounced differences between the individual job streams' performances.
-
+You can find our results in \texttt{sample-output/priorities}.
 
 
 
@@ -488,7 +506,7 @@ We configure a number of clients which introduce jobs from a wide variety of SAT
 \begin{tcolorbox}[
   colback=Magenta!5!white,
   colframe=Magenta!75!black,
-  title={\centering In a Nutshell: Commands for Original Setup}]
+  title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
 for f in sbatch/realistic-*.sh; do sbatch \$f; done\ \ \ \# wait until finished!\\
 reports/report-active-jobs.sh logs/realistic-\{2,1,3\}\\
@@ -499,12 +517,7 @@ reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 \end{tcolorbox}
 
 This section features \textbf{eight experiments} which run for \textbf{one hour each}.
-
-We use the same SLURM directives as in Section~\ref{sec:uniform-jobs} except for the time limit:
-\begin{ttfenv}
-\#SBATCH -t 01:10:00
-\end{ttfenv}
-
+We use the same SLURM directives as in Section~\ref{sec:uniform-jobs} except for the time limit (\texttt{01:10:00}).
 We use the following base options for Mallob:
 
 \begin{ttfenv}
@@ -541,11 +554,10 @@ With the following additional configuration:\\
 
 To output plots as in Fig.~5 in our paper, use these commands:
 \begin{verbatim}
- bash reports/report-active-jobs.sh logs/realistic-{3,1,2}
+ bash reports/report-active-jobs.sh logs/realistic-{2,1,3}
  bash reports/report-utilization.sh logs/realistic-1
 \end{verbatim}
-Both commands will output a graph which should be similar to the plots in the paper.
-The plot featuring the number of active jobs is more of a coarse sanity check; the number of active jobs should fluctuate considerably over time and should be highest for run 2 and lowest for run 3.
+In the first plot, the number of active jobs should fluctuate considerably over time and should be highest for run 2 and lowest for run 3.
 The utilization plot should reveal that consistently high utilization is achieved, namely 99\% or more.
 If utilization drops at certain points, this may mean that the present jobs in the system are not capable of employing all present PEs ($\sum_j d_j < m$).
 In that case, the number of active jobs at that point in time should be very low.
@@ -562,15 +574,15 @@ And last but not least, to reproduce Table~2 from our paper, execute:
  bash reports/report-worker-reuse.sh logs/realistic-{7,8,1}
 \end{verbatim}
 Run 1 (``Ours'') should generally lead to the best performance, although the margin in terms of mean reponse times and processed jobs may be small or non-existent.
-In particular, a considerable improvement in terms of Context Creation Ratio (CCR) and context switches (CS) should be discernible.
-The final five values should be monotonically increasing and the final value should be very close to 1.
+An improvement in terms of Context Creation Ratio (CCR) and context switches (CS) should be noticeable.
+The final five values should be monotonically increasing and the final value should be very close to 1 for each run.
 
-\subsubsection{Small Setup}
+\subsubsection{Short / Small Setup}
 
 \begin{tcolorbox}[
   colback=Magenta!5!white,
   colframe=Magenta!75!black,
-  title={\centering In a Nutshell: Commands for Small Setup (Section~\ref{sec:small-setup})}]
+  title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
 scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 50\,min\\
 reports/report-active-jobs.sh logs/realistic-\{2,1,3\}\\
@@ -580,22 +592,37 @@ reports/report-worker-reuse.sh logs/realistic-\{7,8,1\}
 \end{ttfenvcompact}
 \end{tcolorbox}
 
-For shorter runs, we suggest to reduce the duration of each run to ten minutes by setting \texttt{-T=600}.
+For shorter runs, we suggest to simply reduce the duration of each run to ten minutes by setting \texttt{-T=600}.
 
-For small-scale runs (Section~\ref{sec:small-setup}), prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate}, which reduces the number and size of jobs accordingly.
+For small-scale runs (Section~\ref{sec:small-setup}), we prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate} to use a configuration with a reduced number and size of jobs.
 In particular, we reduced the arrival rates to $1/\lambda \in \{3.\overline{3}\,s, 6.\overline{6}\,s, 13.\overline{3}\,s\}$, reduced the mean wallclock time limit per job from 300\,s to 30\,s, and slightly reduced the size of individual bursts of jobs.
 
 We suggest to \textbf{omit runs 4, 5, and 6} because the different behavior of these runs in terms of latencies unfortunately cannot be reproduced on such a small scale.
 The script we provide will skip these runs per default; you can force to run and display them by calling the reproduce script with option \texttt{-{}-full} and calling the \texttt{report-latencies} script with options \texttt{logs/realistic-\{1,4,5,6\}}.
 
 Overall, results will look differently on this small scale because individual variations of single jobs have a much higher impact than in our large setup where the Law of Large Numbers is in effect.
+Please compare your output to the sample output we provide in \texttt{sample-output/realistic/}.
+%\begin{figure}
+%\centering
+%\includegraphics[width=0.9\textwidth]{../sample-output/realistic-arrivals/active-jobs.png} 
+%\caption{Number of active jobs over time on small setup}
+%\end{figure}
+%\begin{figure}
+%\centering
+%\begin{minipage}{0.5\textwidth}
+%\includegraphics[width=\textwidth]{../sample-output/realistic-arrivals/utilization-rno1.png} 
+%\end{minipage}%
+%\begin{minipage}{0.5\textwidth}
+%\includegraphics[width=\textwidth]{../sample-output/realistic-arrivals/utilization-rno2.png} 
+%\end{minipage}%
+%\caption{Utilization over time of run 1 (left) and run 2 (right)}
+%\end{figure}
 You should be able to reproduce the same qualitative results in terms of active jobs over time, albeit with higher fluctuation due to fewer jobs.
 Also, you should be able to observe consistent reasonably high utilization ($\approx 99\%$) at least for run 2.
-The relatively higher fluctuation on this small scale leads to lower utilization on average due to frequent re-scheduling, and, especially for lower $1/\lambda$, may lead to time intervals where not all PEs can be employed (see Section~\ref{sec:realistic-original}).
-The latencies reported by the respective plots for run 1 should be similarly low as in our distributed setup (or lower).
-However, the latency differences of different request matching strategies cannot be reproduced (see above).
+The relatively higher fluctuation on this small scale leads to lower utilization on average due to frequent re-scheduling, and, especially for low arrival rates, may lead to time intervals where not all PEs can be employed (see Section~\ref{sec:realistic-original}).
+The latencies reported by the respective plots for run 1 should be similarly low as in our distributed setup or lower.
 In terms of worker reuse, you should still be able to discern improvements in terms of CCR and CS for our approach over the other two approaches.
-The absolute values for CCR and CS should be lower (since a single job should experience less rescheduling relatively, compared to a large system) whereas we expect the values for Pr[$\cdot$] to increase more quickly than in our paper -- in our own small scale experiments, no worker was rescheduled five or more times.
+The absolute values for CCR and CS should be lower (since a single job experiences less relative rescheduling than in a large system) whereas we expect the values for Pr[$\cdot$] to increase more quickly than in our paper -- in our own small scale experiments, no worker was rescheduled five or more times.
 
 \section{Troubleshooting}
 
