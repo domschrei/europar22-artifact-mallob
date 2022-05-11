@@ -22,9 +22,9 @@ which mpirun
 echo "#ranks: $SLURM_NTASKS"
 
 # Configuration
-rno=1
+rno=5
 clienttemplate=client-template.json
-moreoptions="-dc=0 -huca=0 -rs=1"
+moreoptions="-dc=0 -huca=100 -rs=1"
 
 # Default logging destination: HOME directory
 logdir=logs/realistic-$rno

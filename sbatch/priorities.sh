@@ -22,7 +22,7 @@ which mpirun
 echo "#ranks: $SLURM_NTASKS"
 
 # Default logging destination: HOME directory
-logdir=logs/mallob_chaos_doublejobs_$SLURM_JOB_ID
+logdir=logs/priorities
 # If available, log to WORK directory which is faster
 if [ -d $WORK_PROJID ]; then logdir="$WORK_PROJID/$logdir"; fi
 

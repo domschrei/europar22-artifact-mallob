@@ -22,8 +22,8 @@ which mpirun
 echo "#ranks: $SLURM_NTASKS"
 
 # Configuration
-rno=1
-clienttemplate=client-template.json
+rno=3
+clienttemplate=client-template-halfjobs.json
 moreoptions="-dc=0 -huca=0 -rs=1"
 
 # Default logging destination: HOME directory

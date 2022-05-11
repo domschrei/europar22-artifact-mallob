@@ -21,17 +21,17 @@ module list
 which mpirun
 echo "#ranks: $SLURM_NTASKS"
 
-# Default logging destination: HOME directory
-logdir=logs/mallob_chaos_doublejobs_$SLURM_JOB_ID
-# If available, log to WORK directory which is faster
-if [ -d $WORK_PROJID ]; then logdir="$WORK_PROJID/$logdir"; fi
-
 # Configuration
 npar=3
 coreminperjob=640
 numclients=1
 activejobsperclient=3
 loadedjobsperclient=6
+
+# Default logging destination: HOME directory
+logdir=logs/uniform-$npar
+# If available, log to WORK directory which is faster
+if [ -d $WORK_PROJID ]; then logdir="$WORK_PROJID/$logdir"; fi
 
 # Create job template file as necessary
 jobtemplate=templates/job-template-sat-r3unknown_100k-${coreminperjob}coremin.json
