@@ -37,6 +37,7 @@
 \usepackage{menukeys}
 \usepackage{tikz,lipsum,lmodern}
 \usepackage[most]{tcolorbox}
+\usepackage{hyperref}
 
 \newcounter{dummy} 
 \numberwithin{dummy}{subsection}
@@ -94,7 +95,7 @@
 
 This document serves as a documentation on the software artifact associated with our Euro-Par 2022 publication (named as above).
 In particular, we describe how to build and run our scheduling platform Mallob and how to reproduce our experiments.
-As our research was conducted on a large configuration (1536--6144 cores) of a commodity cluster with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame ($<2.5$\,h in total).
+As our research was conducted on a considerable portion (1536--6144 cores) of a supercomputer with a total run time of around 14\,h, we describe both our original setup as well as a small setup which only uses a single machine with 64 hardware threads and which runs within a reduced time frame ($<2.5$\,h in total).
 As such, much simpler and less costly experiments can be run while reproducing several of our results on a qualitative level.
 
 
@@ -125,7 +126,7 @@ On an Ubuntu 20.04 system, the following packages with their dependencies are su
 
 \begin{ttfenv}
 sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils \CR\\
-build-essential cmake wget gdb gawk
+\hspace*{0.3cm}build-essential cmake wget gdb gawk
 \end{ttfenv}
 
 
@@ -154,8 +155,8 @@ To build Mallob, follow these steps from the base directory of this artifact:
  \item Generate build files with CMake:
  \begin{ttfenv}
  CC=\$(which mpicc) CXX=\$(which mpicxx) cmake -DCMAKE\_BUILD\_TYPE=RELEASE \CR\\
- -DMALLOB\_USE\_JEMALLOC=1 -DMALLOB\_LOG\_VERBOSITY=4 -DMALLOB\_ASSERT=1 \CR\\
- -DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib ..
+ \hspace*{0.3cm}-DMALLOB\_USE\_JEMALLOC=1 -DMALLOB\_LOG\_VERBOSITY=4 -DMALLOB\_ASSERT=1 \CR\\
+ \hspace*{0.3cm}-DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib ..
  \end{ttfenv}
  \item Build Mallob:\ \ \ \texttt{make; cd ..}
 \end{enumerate}
@@ -192,10 +193,10 @@ To test that everything functions correctly, perform this basic ``sanity check''
 
 \begin{ttfenv}
 PATH=``build:\$PATH RDMAV\_FORK\_SAFE=1'' mpirun -np 4 build/mallob -T=60 \CR\\
--mono=instances/r3unknown\_100k.cnf
+\hspace*{0.3cm}-mono=instances/r3unknown\_100k.cnf
 \end{ttfenv}
 
-Note that we set two environment variables for Mallob: \texttt{PATH=``build:\$PATH''}, which assures that the solver sub-process can be executed, and \texttt{RDMAV\_FORK\_SAFE=1}, which allows MPI applications to spawn (non-MPI) sub-processes without memory corruption.
+For all runs of Mallob we set two environment variables: \texttt{PATH=``build:\$PATH''}, which assures that Mallob can find the executable for the solver sub-process, and \texttt{RDMAV\_FORK\_SAFE=1}, which can be necessary for some MPI setups to allow spawning (non-MPI) sub-processes without memory corruption\footnote{\url{https://www.rdmamojo.com/2012/05/24/ibv_fork_init}}.
 
 The above command should process a single SAT formula with four MPI processes (i.e., four workers) for 60 seconds and then exit unsuccessfully. (Exiting with a solution would be a very lucky outcome.)
 You can compare the output with the sample output we provide in \texttt{sample-output/testrun.txt}.
@@ -247,11 +248,11 @@ For our small setup we provide reference results in \texttt{sample-output/}.
 \label{sec:original-setup}
 
 For documentation purposes, we describe the exact setup we have used for our experiments.
-We used up to 128 ``thin'' compute nodes of SuperMUC-ng\footnote{https://doku.lrz.de/display/PUBLIC/Hardware+of+SuperMUC-NG}.
+We used up to 128 ``thin'' compute nodes of SuperMUC-ng\footnote{\url{https://doku.lrz.de/display/PUBLIC/Hardware+of+SuperMUC-NG}}.
 Each node consists of two Intel Xeon Platinum 8174 processors with 24 physical cores (48 hardware threads) each.
 Each node features a total of 96\,GB of RAM.
 To quote the official documentation of SuperMUC-ng: ``\textit{The internal interconnect is a fast OmniPath network with 100 Gbit/s.
-The compute nodes are bundled into 8 domains (islands). Within one island, the OmniPath network topology is a `fat tree' for highly efficient communication. The OmniPath connection between the islands is pruned (pruning factor 1:4).}''\footnote{https://doku.lrz.de/display/PUBLIC/SuperMUC-NG}
+The compute nodes are bundled into 8 domains (islands). Within one island, the OmniPath network topology is a `fat tree' for highly efficient communication. The OmniPath connection between the islands is pruned (pruning factor 1:4).}''\footnote{\url{https://doku.lrz.de/display/PUBLIC/SuperMUC-NG}}
 
 In addition to the base installation on SuperMUC-ng, we have loaded the following modules (for building as well as execution):
 {
@@ -305,7 +306,7 @@ Therefore, for a single machine with 32 cores and 64 hardware threads, we sugges
 
 \begin{ttfenv}
 PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bind-to core \CR\\
-build/mallob -t=1 \$options
+\hspace*{0.3cm}build/mallob -t=1 \$options
 \end{ttfenv}
 
 For this specific ``small setup'', we provide scripts which run all experiments automatically -- see the highlighted boxes in each subsection.
@@ -335,7 +336,8 @@ All processes (including clients) participate in job scheduling and processing.
   title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
 for f in sbatch/uniform-*.sh; do sbatch \$f; done\ \ \# wait until finished!\\
-for d in logs/uniform-\{1,2,4,8,16,32\}; do reports/report-uniform-jobs.sh \$d; done
+for d in logs/uniform-\{3,6,12,24,48,96,192,384,768\}; do \CR\\ 
+\hspace*{0.3cm}reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
 \end{tcolorbox}
 
@@ -345,10 +347,18 @@ We use the following command-line arguments for Mallob:
 
 \begin{ttfenv}
 -t=4 -q -c=\$numclients -ajpc=\$activejobsperclient -ljpc=\$loadedjobsperclient \CR\\
--T=320 -log=logs/uniform-\$npar -v=4 -warmup -job-template=\$jobtemplate
+\hspace*{0.3cm}-T=320 -log=logs/uniform-\$npar -v=4 -warmup -job-template=\$jobtemplate
 \end{ttfenv}
 
-We define the referenced shell variables as follows for the different runs:\\
+We instantiate a job template file (\texttt{\$jobtemplate}) for a specific CPU limit as follows:
+
+\begin{ttfenv}
+jobtemplate=templates/job-template-sat-r3unknown\_100k-\$\{coreminperjob\}coremin.json\\
+sed 's/CPUMINUTES/'\$coreminperjob'/g' templates/job-template-sat-r3unknown\_100k.json \CR\\
+\hspace*{0.3cm}> \$jobtemplate
+\end{ttfenv}
+
+We define the shell variables referenced above as follows for the different runs:\\
 
 {
 \begin{tabular}{|r|r|r|r|r|}
@@ -368,14 +378,6 @@ We define the referenced shell variables as follows for the different runs:\\
 
 \vspace{0.4cm}
 
-We instantiate a job template file (\texttt{\$jobtemplate}) for a specific CPU limit as follows:
-
-\begin{ttfenv}
-jobtemplate=templates/job-template-sat-r3unknown\_100k-\$\{coreminperjob\}coremin.json\\
-sed 's/CPUMINUTES/'\$coreminperjob'/g' templates/job-template-sat-r3unknown\_100k.json \CR\\
-> \$jobtemplate
-\end{ttfenv}
-
 N.B.: The more jobs we process in parallel, the more PEs we configure to introduce jobs (``clients'').
 This is done in order to prevent a single client to become a bottleneck for introducing jobs.
 As such, we can focus on the decentralized scheduling capabilities of our system.
@@ -394,7 +396,8 @@ If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we 
   title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
 scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for 36\,min \\
-for d in logs/uniform-\{1,2,4,8,16,32\}; do reports/report-uniform-jobs.sh \$d; done
+for d in logs/uniform-\{1,2,4,8,16,32\}; do \CR\\
+\hspace*{0.3cm}reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
 \end{tcolorbox}
 
@@ -431,6 +434,8 @@ To compare your output with the output we observed, see \texttt{sample-output/un
 This experiment corresponds to Section~5.2 of our paper.
 We configure a number of clients each of which is associated with a certain priority and introduces a stream of jobs of this priority.
 Again, all MPI processes participate in job scheduling and processing, and our job scheduling enforces that jobs of higher priority receive more resources.
+We configure each stream of jobs to cycle through a random permutation of 80 carefully selected SAT instances (see our paper) and only use the first 80 jobs of each stream for analyzing its performance.
+As such, the system state remains constant throughout the entire run even if one of the streams finishes its batch of 80 instances before another stream.
 
 \subsubsection{Original Setup}
 
@@ -449,8 +454,8 @@ We use the following command line arguments:
 
 \begin{ttfenv}
 -t=4 -q -c=9 -ajpc=1 -jwl=300 -T=21500 -log=logs/priorities -v=4 -warmup -pls=0 \CR\\
--sjd=1 -job-template=templates/job-template-priorities.json \CR\\
- -job-desc-template=templates/selection\_isc2020.txt
+\hspace*{0.3cm}-sjd=1 -job-template=templates/job-template-priorities.json \CR\\
+\hspace*{0.3cm}-job-desc-template=templates/selection\_isc2020.txt
 \end{ttfenv}
 
 The script \texttt{reports/report-impact-of-priorities.sh} should recognize automatically how many streams with which priorities have been used.
@@ -522,11 +527,11 @@ We use the same SLURM directives as in Section~\ref{sec:uniform-jobs} except for
 We use the following base options for Mallob:
 
 \begin{ttfenv}
--t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-\$rno -v=4 -warmup \CR\\
--satsolver=kclkclcl -pls=0 -sjd=1 -ba=8  \CR\\
- -job-template=instances/job-template-priorities.json  \CR\\
- -job-desc-template=instances/selection\_isc2020\_384.txt  \CR\\
- -client-template=instances/\$clienttemplate
+-t=4 -q -c=4 -ajpc=384 -ljpc=4 -T=3600 -log=logs/realistic-\$rno \CR\\
+\hspace*{0.3cm}-v=4 -warmup -satsolver=kclkclcl -pls=0 -sjd=1 -ba=8  \CR\\
+\hspace*{0.3cm}-job-template=instances/job-template-priorities.json  \CR\\
+\hspace*{0.3cm}-job-desc-template=instances/selection\_isc2020\_384.txt  \CR\\
+\hspace*{0.3cm}-client-template=instances/\$clienttemplate
 \end{ttfenv}
 
 With the following additional configuration:\\
@@ -663,6 +668,12 @@ Note that for $1 \leq c < 32$, hardware thread $c$ is ``almost idle'' while hard
 The only exception here is $c=32$ where both hardware threads are fully utilized; this is a ``client'' PE which currently parses a job description (SAT formula).
 
 
+\section{Closing Notes}
+
+Our software named Mallob can be accessed at \url{https://github.com/domschrei/mallob}.
+Please see the license information provided there for using the different modules of Mallob.
+If any questions about the evaluation process arise, please contact \texttt{dominik.schreiber@kit.edu}.
+In case this address is not active any longer, please try \texttt{mail@dominikschreiber.de}.
 
 % sbatch/mallob_satscheduler.sh
 

@@ -29,12 +29,14 @@ PATH="build:$PATH" RDMAV_FORK_SAFE=1 srun -n $SLURM_NTASKS build/mallob $options
 
 # 2.2 Small Setup
 
+mpirun -np $numprocesses -map-by numa:PE=4 -bind-to core $command
+
 PATH="build:$PATH" RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 $options
 
 # 2.3.1 Uniform Jobs / Original Setup
 
 for f in sbatch/uniform-*.sh; do sbatch $f; done
-for d in logs/uniform-{1,2,4,8,16,32}; do reports/report-uniform-jobs.sh $d; done
+for d in logs/uniform-{3,6,12,24,48,96,192,384,768}; do reports/report-uniform-jobs.sh $d; done
 
 jobtemplate=templates/job-template-sat-r3unknown_100k-${coreminperjob}coremin.json
 sed 's/CPUMINUTES/'$coreminperjob'/g' templates/job-template-sat-r3unknown_100k.json > $jobtemplate
