@@ -335,7 +335,7 @@ All processes (including clients) participate in job scheduling and processing.
   title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
 for f in sbatch/uniform-*.sh; do sbatch \$f; done\ \ \# wait until finished!\\
-for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
+for d in logs/uniform-\{1,2,4,8,16,32\}; do reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
 \end{tcolorbox}
 
@@ -394,7 +394,7 @@ If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we 
   title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
 scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for 36\,min \\
-for d in logs/uniform-*; do reports/report-uniform-jobs.sh \$d; done
+for d in logs/uniform-\{1,2,4,8,16,32\}; do reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
 \end{tcolorbox}
 

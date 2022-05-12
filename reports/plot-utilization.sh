@@ -2,14 +2,15 @@
 
 set -e
 
-basedir="$1"
-
-if [ ! -d "$basedir" ]; then
+if [ ! -d "$1" ]; then
     echo "No valid directory provided."
     exit 1
 fi
 
-# Plot utilization
-python3 scripts/plot/plot_curves.py -xy ${basedir}/data/loads_slavg_{1,15,60}s -nomarkers -linestyles='-' \
--linewidths=0.1,0.6,1 -colors="#ffe0c0,#ffb070,#ff7f00" -nolegend \
--ymax=1 -xlabel="Elapsed time [s]" -ylabel="Utilization"
+for d in $@; do
+    # Plot utilization
+    python3 scripts/plot/plot_curves.py -xy \
+    ${d}/data/loads_slavg_{1,15,60}s -nomarkers -linestyles='-' \
+    -linewidths=0.2,0.7,1 -colors="#ffd0b0,#ffb070,#ff7f00" -nolegend \
+    -ymax=1 -xlabel="Elapsed time [s]" -ylabel="Utilization"
+done

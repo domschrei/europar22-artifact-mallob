@@ -34,7 +34,7 @@ PATH="build:$PATH" RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to co
 # 2.3.1 Uniform Jobs / Original Setup
 
 for f in sbatch/uniform-*.sh; do sbatch $f; done
-for d in logs/uniform-*; do reports/report-uniform-jobs.sh $d; done
+for d in logs/uniform-{1,2,4,8,16,32}; do reports/report-uniform-jobs.sh $d; done
 
 jobtemplate=templates/job-template-sat-r3unknown_100k-${coreminperjob}coremin.json
 sed 's/CPUMINUTES/'$coreminperjob'/g' templates/job-template-sat-r3unknown_100k.json > $jobtemplate
@@ -42,7 +42,7 @@ sed 's/CPUMINUTES/'$coreminperjob'/g' templates/job-template-sat-r3unknown_100k.
 # 2.3.2 Uniform Jobs / Short / Small Setup
 
 scripts/run/reproduce-small-uniform.sh
-for d in logs/uniform-*; do reports/report-uniform-jobs.sh $d; done
+for d in logs/uniform-{1,2,4,8,16,32}; do reports/report-uniform-jobs.sh $d; done
 
 # 2.4.1 Impact of Priorities / Original Setup
 
