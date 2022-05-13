@@ -244,6 +244,13 @@ We first describe these two setups in general and then explain how each of our e
 For our original setup we refer to our original paper for reference results.
 For our small setup we provide reference results in \texttt{sample-output/}.
 
+In order to keep the size of this artifact within reasonable bounds, we do not provide the log files of our runs in this artifact.
+However, we provide downloadable ZIP files for selected log files (rank 0 + all clients) of our original setup\footnote{\url{https://algo2.iti.kit.edu/schreiber/downloads/europar22-logs-original-setup.zip},
+
+\hspace*{0.4cm}MD5 checksum: a2ded6d54c488cd36afae600f6824386} and for the log files of our small setup\footnote{\url{https://algo2.iti.kit.edu/schreiber/downloads/europar22-logs-small-setup.zip}, 
+
+\hspace*{0.4cm}MD5 checksum: c5b135c7aeb1717ec816d3d702b0a886}.
+
 \subsection{Original Setup}
 \label{sec:original-setup}
 
@@ -460,8 +467,7 @@ We use the following command line arguments:
 \hspace*{0.3cm}-job-desc-template=templates/selection\_isc2020.txt
 \end{ttfenv}
 
-The script \texttt{reports/report-impact-of-priorities.sh} should recognize automatically how many streams with which priorities have been used.
-The script outputs a plain text table and a plot, similar to Fig. 4 in our paper.
+The script \texttt{reports/report-impact-of-priorities.sh} outputs a table and a plot similar to Fig. 4 in our paper.
 Check that the mean assigned volume grows proportional to the assigned priority, except for rounding offsets.
 Response times should improve (i.e., decrease) for growing priorities.
 
