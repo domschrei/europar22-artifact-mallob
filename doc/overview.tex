@@ -268,7 +268,7 @@ SuperMUC-ng runs the SLURM workload manager, which is a centralized scheduling s
 Jobs in SLURM are described via a script file with special \textit{SLURM directives} which describe the kind of deployment, the scale, maximum processing time, and other meta data.
 Jobs are then submitted to SLURM via the command \texttt{sbatch \$file}.
 Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs.
-The SLURM directives for our experiments look like this:
+The SLURM directives for our experiments on SuperMUC-ng look like this:
 \begin{ttfenv}
 \#SBATCH -t 00:06:00\\
 \#SBATCH --nodes=128\\
@@ -278,14 +278,16 @@ The SLURM directives for our experiments look like this:
 \end{ttfenv}
 The first two directives specify the maximum run time and the number of nodes (machines) of the experiment.
 The subsequent directives describe how we subdivide each node into a number of MPI processes (``tasks'') with four cores, i.e., eight hardware threads, each.
-Depending on the particular system available to you, \textbf{it is likely that you need to modify or extend these files}.
-In particular, you may arrive at a different number of MPI processes per node (twelve in our case) depending on the cores available per machine.
-Please consult the documentation for your compute cluster.
-Our \texttt{sbatch} scripts then load the environment modules listed above, create logging directories in advance (since this is more efficient than having all MPI processes create their own log directory at the same time), and execute Mallob as follows:
+The option \texttt{-{}-ntasks-per-core} is named confusingly: It specifies to use hardware threads instead of cores (i.e., use eight hardware threads, not eight cores, per process).
+Our \texttt{sbatch} scripts load the environment modules listed above, create logging directories in advance (since this is more efficient than having all MPI processes create their own log directory at the same time), and execute Mallob as follows:
 \begin{ttfenv}
 PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 \textbf{srun} -n \$SLURM\_NTASKS build/mallob \$options
 \end{ttfenv}
 
+Depending on the particular system available to you, \textbf{it is likely that you need to modify or extend the \texttt{sbatch} files}.
+For instance, you may arrive at a different number of MPI processes per node (twelve in our case) depending on the cores available per machine.
+Other differences may include how the call to MPI looks like (\texttt{mpirun} vs.\ \texttt{srun} vs.\ \texttt{mpiexec.hydra} vs.\ \ldots) and how exactly you need to provide binding/mapping information.
+As we are unable to account for all possible cluster configurations, please consult the documentation for your particular compute cluster to find which exact SLURM configuration is required for hybrid (MPI + multithreading) programs.
 
 \subsection{Small Setup}
 \label{sec:small-setup}
@@ -312,7 +314,7 @@ PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bin
 For this specific ``small setup'', we provide scripts which run all experiments automatically -- see the highlighted boxes in each subsection.
 
 We tested all ``small setup'' experiments on a machine with four 8-core Intel Xeon E5-4640 CPUs clocked at 2.4\,GHz and with 512\,GB of RAM.
-The machine ran Ubuntu 20.04 with Linux kernel 5.4, and we used Open MPI 4.0.3.
+The machine ran Ubuntu 20.04 with Linux kernel 5.4, and we used Open MPI 4.0.3 and compiled with GCC~9.3.0.
 
 
 
