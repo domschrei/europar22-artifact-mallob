@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-core=2
 #SBATCH -t 00:07:30
 #SBATCH -J mallob_experiment_uniform
-#SBATCH --ear=off # Turn off Energe-Aware Runtime (which may tamper with clock rates)
+# SBATCH --ear=off # Turn off Energe-Aware Runtime (which may tamper with clock rates)
 # SBATCH --ear-mpi-dist=openmpi # Switch this on to use OpenMPI (we do not)
 
 # SuperMUC has TWO processors with 24 physical cores each, totalling 48 physical cores (96 hwthreads).
