@@ -2,6 +2,24 @@
 
 set -e
 
+# Find number of processes to use
+if [ -z $NUM_PROCS ]; then
+    nprocs=32
+    echo "Number of processes (env. variable NUM_PROCS) not specified; defaulting to $nprocs processes"
+else
+    nprocs=$NUM_PROCS
+    echo "Using $nprocs processes"
+fi
+
+# Find number of worker threads to run per process
+if [ -z $NUM_THREADS_PER_PROCESS ]; then
+    nthreadsperprocess=1
+    echo "Number of worker threads per process (env. variable NUM_THREADS_PER_PROCESS) not specified; defaulting to $nthreadsperprocess threads per process"
+else
+    nthreadsperprocess=$NUM_THREADS_PER_PROCESS
+    echo "Running $nthreadsperprocess worker threads per process"
+fi
+
 # By default, runs with non-standard "huca" option are skipped because 
 # the associated effects cannot be reproduced on such a small scale.
 # You can force to run them with the option "--full".
@@ -41,7 +59,7 @@ cat scripts/run/configs-small-realistic.csv|while read -r line; do
     echo "Running experiment: rno=$rno clienttemplate=$clienttemplate moreoptions=$moreoptions"
     
     # Run the experiment
-    PATH=build:$PATH RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 -q -c=1 -ajpc=384 -ljpc=4 -T=600 -log=$logdir -v=4 -warmup -satsolver=kclkclcl -pls=0 -sjd=1 -job-template=templates/job-template-priorities.json -job-desc-template=templates/selection_isc2020_384.txt -client-template=templates/$clienttemplate $moreoptions 2>&1 > OUT < /dev/null
+    PATH=build:$PATH RDMAV_FORK_SAFE=1 mpirun -np $nprocs -map-by numa:PE=$nthreadsperprocess -bind-to core build/mallob -t=$nthreadsperprocess -q -c=1 -ajpc=384 -ljpc=4 -T=600 -log=$logdir -v=4 -warmup -satsolver=kclkclcl -pls=0 -sjd=1 -job-template=templates/job-template-priorities.json -job-desc-template=templates/selection_isc2020_384.txt -client-template=templates/$clienttemplate $moreoptions 2>&1 > OUT < /dev/null
     
     # Experiment footer to STDOUT
     echo "Experiment done"
