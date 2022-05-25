@@ -1,0 +1,22 @@
+{
+    "priority": {
+        "type": "uniform",
+        "params": [0.01,1]
+    },
+    "maxdemand": {
+        "type": "uniform",
+        "params": [1,32]
+    },
+    "wallclock-limit": {
+        "type": "normal",
+        "params": [30, 10, 1, 60]
+    },
+    "arrival": {
+        "type": "exponential",
+        "params": [0.0375]
+    },
+    "burstsize": {
+        "type": "normal",
+        "params": [1, 1, 1, 3]
+    }
+}

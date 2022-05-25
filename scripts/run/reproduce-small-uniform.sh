@@ -3,11 +3,11 @@
 set -e
 
 # Find number of processes to use
-if [ -z $NUM_PROCS ]; then
+if [ -z $NUM_PROCESSES ]; then
     nprocs=32
-    echo "Number of processes (env. variable NUM_PROCS) not specified; defaulting to $nprocs processes"
+    echo "Number of processes (env. variable NUM_PROCESSES) not specified; defaulting to $nprocs processes"
 else
-    nprocs=$NUM_PROCS
+    nprocs=$NUM_PROCESSES
     echo "Using $nprocs processes"
 fi
 

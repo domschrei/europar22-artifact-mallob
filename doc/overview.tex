@@ -274,14 +274,14 @@ In addition to the base installation on SuperMUC-ng, we have loaded the followin
 SuperMUC-ng runs the SLURM workload manager, which is a centralized scheduling system.
 Jobs in SLURM are described via a script file with special \textit{SLURM directives} which describe the kind of deployment, the scale, maximum processing time, and other meta data.
 Jobs are then submitted to SLURM via the command \texttt{sbatch \$file}.
-Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs.
+Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs, and we also provide automation to instantiate these SLURM scripts for a differing number of nodes, processes per node, or threads per process.
 The SLURM directives for our experiments on SuperMUC-ng look like this:
 \begin{ttfenv}
 \#SBATCH -t 00:06:00\\
-\#SBATCH --nodes=128\\
-\#SBATCH --ntasks-per-node=12\\
-\#SBATCH --cpus-per-task=8\\
-\#SBATCH --ntasks-per-core=2
+\#SBATCH -{}-nodes=128\\
+\#SBATCH -{}-ntasks-per-node=12\\
+\#SBATCH -{}-cpus-per-task=8\\
+\#SBATCH -{}-ntasks-per-core=2
 \end{ttfenv}
 The first two directives specify the maximum run time and the number of nodes (machines) of the experiment.
 The subsequent directives describe how we subdivide each node into a number of MPI processes (``tasks'') with four cores, i.e., eight hardware threads, each.
@@ -292,8 +292,7 @@ PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 \textbf{srun} -n \$SLURM\_NTASKS build
 \end{ttfenv}
 
 Depending on the particular system available to you, \textbf{it is likely that you need to modify or extend the \texttt{sbatch} files}.
-For instance, you may arrive at a different number of MPI processes per node (twelve in our case) depending on the cores available per machine.
-Other differences may include how the call to MPI looks like (\texttt{mpirun} vs.\ \texttt{srun} vs.\ \texttt{mpiexec.hydra} vs.\ \ldots) and how exactly you need to provide binding/mapping information.
+For instance, you may need to specify a user name or a certain partition of the cluster to run the job on.
 As we are unable to account for all possible cluster configurations, please consult the documentation for your particular compute cluster to find which exact SLURM configuration is required for hybrid (MPI + multithreading) programs.
 
 \subsection{Small Setup}
@@ -318,7 +317,8 @@ PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bin
 \hspace*{0.3cm}build/mallob -t=1 \$options
 \end{ttfenv}
 
-For this specific ``small setup'', we provide scripts which run all experiments automatically -- see the highlighted boxes in each subsection.
+We provide scripts which run all experiments automatically with this specific small setup in mind, and the number of processes and the number of worker threads per process can be customized with corresponding environment variables before calling each script. 
+See the highlighted boxes in each subsection for details.
 
 We tested all ``small setup'' experiments on a machine with four 8-core Intel Xeon E5-4640 CPUs clocked at 2.4\,GHz and with 512\,GB of RAM.
 The machine ran Ubuntu 20.04 with Linux kernel 5.4, and we used Open MPI 4.0.3 and compiled with GCC~9.3.0.
@@ -344,6 +344,8 @@ All processes (including clients) participate in job scheduling and processing.
   colframe=Magenta!75!black,
   title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
+NUM\_NODES=128 NUM\_PROCESSES\_PER\_NODE=12 NUM\_THREADS\_PER\_PROCESS=4 \CR\\
+\hspace*{0.3cm}sbatch/generate-uniform.sh\\
 for f in sbatch/uniform-*.sh; do sbatch \$f; done\ \ \# wait until finished!\\
 for d in logs/uniform-\{3,6,12,24,48,96,192,384,768\}; do \CR\\ 
 \hspace*{0.3cm}reports/report-uniform-jobs.sh \$d; done
@@ -397,6 +399,9 @@ Running the script as indicated above, you should obtain a number of measures wh
 The different efficiencies reported ($\theta/\theta_{\text{opt}}$, $\eta$, and $u$) should be close to one (>97\%) for all experiments.
 If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we expect that the lowest values are reported for the two extreme cases and that better values are reported in between.
 
+If you run the experiment with a differing setup (see the environment variables in the highlighted box), please keep in mind that \texttt{\$npar} must be no larger than \texttt{NUM\_NODES} (i.e., you should just skip the runs which fail this criterium).
+Also, please keep in mind that our report script expects that \texttt{NUM\_THREADS\_PER\_PROCESS=4} was set and will output incorrect results otherwise.
+
 \subsubsection{Short / Small Setup}
 
 \begin{tcolorbox}[
@@ -404,7 +409,8 @@ If $\theta/\theta_{\text{opt}}$ varies considerably over the different runs, we 
   colframe=Magenta!75!black,
   title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for 36\,min \\
+NUM\_PROCESSES=32 NUM\_THREADS\_PER\_PROCESS=1 \CR\\
+\hspace*{0.3cm}scripts/run/reproduce-small-uniform.sh\ \ \ \# runs for 36\,min \\
 for d in logs/uniform-\{1,2,4,8,16,32\}; do \CR\\
 \hspace*{0.3cm}reports/report-uniform-jobs.sh \$d; done
 \end{ttfenvcompact}
@@ -415,7 +421,8 @@ Due to these changes we suggest to adjust the runs as provided in the below tabl
 (Note that $n_{\text{par}}$ must not exceed the number of MPI processes for your particular setup.)
 
 We expect the same qualitative results on such a smaller scale.
-To compare your output with the output we observed, see \texttt{sample-output/uniform-jobs/report.txt}.\\
+To compare your output with the output we observed, see \texttt{sample-output/uniform-jobs/report.txt}.
+As in the original setup, note that our report script expects that \texttt{NUM\_THREADS\_PER\_PROCESS=1} was set.\\
 
 {
 \begin{tabular}{|r|r|r|r|r|}
@@ -453,6 +460,8 @@ As such, the system state remains constant throughout the entire run even if one
   colframe=Magenta!75!black,
   title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
+NUM\_NODES=32 NUM\_PROCESSES\_PER\_NODE=12 NUM\_THREADS\_PER\_PROCESS=4 \CR\\
+\hspace*{0.3cm}sbatch/generate-priorities.sh\\
 sbatch sbatch/priorities.sh\ \ \ \# wait until finished!\\
 reports/report-impact-of-priorities.sh logs/priorities
 \end{ttfenvcompact}
@@ -478,7 +487,8 @@ Response times should improve (i.e., decrease) for growing priorities.
   colframe=Magenta!75!black,
   title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-priorities.sh\ \ \ \# runs for 1\,h\\
+NUM\_PROCESSES=32 NUM\_THREADS\_PER\_PROCESS=1 \CR\\
+\hspace*{0.3cm}scripts/run/reproduce-small-priorities.sh\ \ \ \# runs for 1\,h\\
 reports/report-impact-of-priorities.sh logs/priorities
 \end{ttfenvcompact}
 \end{tcolorbox}
@@ -522,6 +532,8 @@ We configure a number of clients which introduce jobs from a wide variety of SAT
   colframe=Magenta!75!black,
   title={\centering Commands for Original Setup}]
 \begin{ttfenvcompact}
+NUM\_NODES=128 NUM\_PROCESSES\_PER\_NODE=12 NUM\_THREADS\_PER\_PROCESS=4 \CR\\
+\hspace*{0.3cm}sbatch/generate-realistic.sh\\
 for f in sbatch/realistic-*.sh; do sbatch \$f; done\ \ \ \# wait until finished!\\
 reports/report-active-jobs.sh logs/realistic-\{2,1,3\}\\
 reports/report-utilization.sh logs/realistic-1\\
@@ -565,7 +577,8 @@ With the following additional configuration:\\
 }
 \vspace{0.4cm}
 
-
+Please note that modifying the total number of processes in the system leads to differing performance in job processing and may therefore result in a ``too busy'' system at times.
+If you notice for your setup that the reported number of active jobs (see below) is often equal to the number of processes, you may want to add an additional experiment with an even lower $\lambda$, e.g., by using \texttt{clienttemplate}=client-template-quarterjobs.json or by modifying the value given in the JSON file as \texttt{arrival.params[0]} yourself.
 To output plots as in Fig.~5 in our paper, use these commands:
 \begin{verbatim}
  bash reports/report-active-jobs.sh logs/realistic-{2,1,3}
@@ -598,7 +611,8 @@ The final five values should be monotonically increasing and the final value sho
   colframe=Magenta!75!black,
   title={\centering Commands for Small Setup}]
 \begin{ttfenvcompact}
-scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 50\,min\\
+NUM\_PROCESSES=32 NUM\_THREADS\_PER\_PROCESS=1 \CR\\
+\hspace*{0.3cm}scripts/run/reproduce-small-realistic.sh\ \ \ \# runs for 50\,min\\
 reports/report-active-jobs.sh logs/realistic-\{2,1,3\}\\
 reports/report-utilization.sh logs/realistic-\{1,2\}\\
 reports/report-latencies.sh logs/realistic-1\\
@@ -610,6 +624,7 @@ For shorter runs, we suggest to simply reduce the duration of each run to ten mi
 
 For small-scale runs (Section~\ref{sec:small-setup}), we prepend ``\texttt{small-}'' to each value of \texttt{\$clienttemplate} to use a configuration with a reduced number and size of jobs.
 In particular, we reduced the arrival rates to $1/\lambda \in \{3.\overline{3}\,s, 6.\overline{6}\,s, 13.\overline{3}\,s\}$, reduced the mean wallclock time limit per job from 300\,s to 30\,s, and slightly reduced the size of individual bursts of jobs.
+As in our original setup, note that even smaller configurations of Mallob may lead to a ``too busy'' system with these values, so you may want to use small-client-template-quarterjobs.json or edit the values of $\lambda$ yourself.
 
 We suggest to \textbf{omit runs 4, 5, and 6} because the different behavior of these runs in terms of latencies unfortunately cannot be reproduced on such a small scale.
 The script we provide will skip these runs per default; you can force to run and display them by calling the reproduce script with option \texttt{-{}-full} and calling the \texttt{report-latencies} script with options \texttt{logs/realistic-\{1,4,5,6\}}.
