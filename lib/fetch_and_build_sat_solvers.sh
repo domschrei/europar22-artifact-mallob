@@ -49,6 +49,7 @@ if echo $solvers|grep -q "y" && [ ! -f yalsat/libyals.a ]; then
     for f in *.c *.h ; do
         sed -i 's/exit ([01])/abort()/g' $f
     done
+    sed -i 's/#ifdef __linux__/#if 0/g' yals.c
     ./configure.sh
     make
     cd ..
