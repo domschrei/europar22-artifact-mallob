@@ -274,7 +274,7 @@ In addition to the base installation on SuperMUC-ng, we have loaded the followin
 SuperMUC-ng runs the SLURM workload manager, which is a centralized scheduling system.
 Jobs in SLURM are described via a script file with special \textit{SLURM directives} which describe the kind of deployment, the scale, maximum processing time, and other meta data.
 Jobs are then submitted to SLURM via the command \texttt{sbatch \$file}.
-Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs, and we also provide automation to instantiate these SLURM scripts for a differing number of nodes, processes per node, or threads per process.
+Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs, and we also provide automation to instantiate these SLURM scripts for a differing number of nodes, processes per node, or worker threads per process.
 The SLURM directives for our experiments on SuperMUC-ng look like this:
 \begin{ttfenv}
 \#SBATCH -t 00:06:00\\
