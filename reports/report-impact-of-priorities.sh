@@ -22,6 +22,8 @@ numclients=$(echo $options|grep -oE " -c=[0-9]+ "|grep -oE "[0-9]+")
 lastclient=$(echo */|tr ' ' '\n'|grep -E '^[0-9]+/$'|sort -g|tail -1|sed 's,/,,g')
 # Calculate the rank of the first client 
 firstclient=$(($lastclient - $numclients + 1))
+# Extract per-job wallclock time from the program options
+jobwallclocklimit=$(echo $options|grep -oE " -jwl=[0-9\.]+ "|grep -oE "[0-9\.]+")
 
 # Gather the used priorities
 echo "Prio" > data/priorities # header for the table we will output in the end
@@ -68,7 +70,7 @@ for rank in $(seq $firstclient $lastclient); do
       sums += t; nums += 1;\
      }\
     } END {\
-     print((sums + (80-nums)*300) / 80)\
+     print((sums + (80-nums)*'$jobwallclocklimit') / 80)\
     }'
 done >> data/times
 
