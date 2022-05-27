@@ -16,6 +16,7 @@
 #include "util/sys/thread_pool.hpp"
 #include "data/checksum.hpp"
 #include "app/sat/horde_process.hpp"
+#include "util/sys/fileutils.hpp"
 
 #include "app/sat/horde_process_adapter.hpp"
 #include "hordesat/horde.hpp"
@@ -55,6 +56,9 @@ int main(int argc, char *argv[]) {
     pid_t pid = Proc::getPid();
     LOG(V3_VERB, "Mallob SAT engine %s pid=%lu\n", MALLOB_VERSION, pid);
     
+    // Clean up subprocess command tmp file
+    FileUtils::rm("/tmp/mallob_subproc_cmd_" + std::to_string(pid));
+
     try {
         // Launch program
         HordeProcess p(params, config, Logger::getMainInstance());

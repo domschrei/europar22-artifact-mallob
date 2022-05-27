@@ -156,21 +156,11 @@ To build Mallob, follow these steps from the base directory of this artifact:
  \begin{ttfenv}
  CC=\$(which mpicc) CXX=\$(which mpicxx) cmake -DCMAKE\_BUILD\_TYPE=RELEASE \CR\\
  \hspace*{0.3cm}-DMALLOB\_USE\_JEMALLOC=1 -DMALLOB\_LOG\_VERBOSITY=4 -DMALLOB\_ASSERT=1 \CR\\
- \hspace*{0.3cm}-DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib ..
+ \hspace*{0.3cm}-DMALLOB\_JEMALLOC\_DIR=lib/jemalloc-5.2.1/lib \CR\\
+ \hspace*{0.3cm}-DMALLOB\_SUBPROC\_DISPATCH\_PATH={\textbackslash}"build/{\textbackslash}" ..
  \end{ttfenv}
  \item Build Mallob:\ \ \ \texttt{make; cd ..}
 \end{enumerate}
-
-\iffalse
-\subsubsection{Build without Internet Access}
-
-You might need to build Mallob on a platform without direct internet access, as was the case for the cluster we used.
-%We have set up a temporary SSH file system (SSHFS) which mounts a user directory of the cluster at our own machine.
-%(Please refer to the documentation of your cluster for more information.)
-On your machine with internet access, download and extract the artifact and fetch the SAT solvers and (if desired) jemalloc by executing \texttt{fetch\_solvers.sh} and \texttt{fetch\_jemalloc.sh} from the \texttt{lib/} subdirectory.
-After these steps, copy the directory structure to the cluster.
-On the cluster, follow the usual build procedure, calling again \texttt{fetch\_and\_build\_...} where you previously only called \texttt{fetch\_...}.
-\fi
 
 \subsection{Fetching Benchmarks}
 
@@ -192,11 +182,11 @@ Make sure that \texttt{./reports/} and \texttt{./templates/} are valid paths as 
 To test that everything functions correctly, perform this basic ``sanity check'' for your Mallob environment:
 
 \begin{ttfenv}
-PATH=``build:\$PATH RDMAV\_FORK\_SAFE=1'' mpirun -np 4 build/mallob -T=60 \CR\\
+RDMAV\_FORK\_SAFE=1'' mpirun -np 4 build/mallob -T=60 \CR\\
 \hspace*{0.3cm}-mono=instances/r3unknown\_100k.cnf
 \end{ttfenv}
 
-For all runs of Mallob we set two environment variables: \texttt{PATH=``build:\$PATH''}, which assures that Mallob can find the executable for the solver sub-process, and \texttt{RDMAV\_FORK\_SAFE=1}, which can be necessary for some MPI setups to allow spawning (non-MPI) sub-processes without memory corruption\footnote{\url{https://www.rdmamojo.com/2012/05/24/ibv_fork_init}}.
+For all runs of Mallob we set environment variable \texttt{RDMAV\_FORK\_SAFE=1}, which can be necessary for some MPI setups to allow spawning (non-MPI) sub-processes without memory corruption\footnote{\url{https://www.rdmamojo.com/2012/05/24/ibv_fork_init}}.
 
 The above command should process a single SAT formula with four MPI processes (i.e., four workers) for 60 seconds and then exit unsuccessfully. (Exiting with a solution would be a very lucky outcome.)
 You can compare the output with the sample output we provide in \texttt{sample-output/testrun.txt}.
@@ -288,7 +278,7 @@ The subsequent directives describe how we subdivide each node into a number of M
 The option \texttt{-{}-ntasks-per-core} is named confusingly: It specifies to use hardware threads instead of cores (i.e., use eight hardware threads, not eight cores, per process).
 Our \texttt{sbatch} scripts load the environment modules listed above, create logging directories in advance (since this is more efficient than having all MPI processes create their own log directory at the same time), and execute Mallob as follows:
 \begin{ttfenv}
-PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 \textbf{srun} -n \$SLURM\_NTASKS build/mallob \$options
+RDMAV\_FORK\_SAFE=1 \textbf{srun} -n \$SLURM\_NTASKS build/mallob \$options
 \end{ttfenv}
 
 Depending on the particular system available to you, \textbf{it is likely that you need to modify or extend the \texttt{sbatch} files}.
@@ -313,7 +303,7 @@ As such you can quadruple the number of MPI processes while giving each solver p
 Therefore, for a single machine with 32 cores and 64 hardware threads, we suggest to run the following command:
 
 \begin{ttfenv}
-PATH=``build:\$PATH'' RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bind-to core \CR\\
+RDMAV\_FORK\_SAFE=1 mpirun -np 32 --map-by numa:PE=1 --bind-to core \CR\\
 \hspace*{0.3cm}build/mallob -t=1 \$options
 \end{ttfenv}
 

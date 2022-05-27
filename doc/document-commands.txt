@@ -8,7 +8,7 @@ sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils build-essent
 ( cd lib && bash fetch_and_build_jemalloc.sh )
 ( cd lib && bash fetch_and_build_sat_solvers.sh )
 mkdir -p build; cd build
-CC=$(which mpicc) CXX=$(which mpicxx) cmake -DCMAKE_BUILD_TYPE=RELEASE -DMALLOB_USE_JEMALLOC=1 -DMALLOB_LOG_VERBOSITY=4 -DMALLOB_ASSERT=1 -DMALLOB_JEMALLOC_DIR=lib/jemalloc-5.2.1/lib ..
+CC=$(which mpicc) CXX=$(which mpicxx) cmake -DCMAKE_BUILD_TYPE=RELEASE -DMALLOB_USE_JEMALLOC=1 -DMALLOB_LOG_VERBOSITY=4 -DMALLOB_ASSERT=1 -DMALLOB_JEMALLOC_DIR=lib/jemalloc-5.2.1/lib -DMALLOB_SUBPROC_DISPATCH_PATH=\"build/\" ..
 make; cd ..
 
 # 1.3 Fetching Benchmarks
@@ -17,7 +17,7 @@ make; cd ..
 
 # 1.4 Test Run
 
-PATH="build:$PATH" RDMAV_FORK_SAFE=1 mpirun -np 4 build/mallob -T=60 -mono=instances/r3unknown_100k.cnf
+RDMAV_FORK_SAFE=1 mpirun -np 4 build/mallob -T=60 -mono=instances/r3unknown_100k.cnf
 
 # 1.5 On Producing Plots
 
@@ -25,13 +25,13 @@ sudo apt install python3-matplotlib
 
 # 2.1 Original Setup
 
-PATH="build:$PATH" RDMAV_FORK_SAFE=1 srun -n $SLURM_NTASKS build/mallob $options
+RDMAV_FORK_SAFE=1 srun -n $SLURM_NTASKS build/mallob $options
 
 # 2.2 Small Setup
 
 mpirun -np $numprocesses -map-by numa:PE=4 -bind-to core $command
 
-PATH="build:$PATH" RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 $options
+RDMAV_FORK_SAFE=1 mpirun -np 32 -map-by numa:PE=1 -bind-to core build/mallob -t=1 $options
 
 # 2.3.1 Uniform Jobs / Original Setup
 
