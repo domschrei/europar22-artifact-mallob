@@ -35,6 +35,7 @@ for f in sbatch/templates/uniform-*.sh; do
     |sed 's/--ntasks-per-node=.*/--ntasks-per-node='$nprocspernode'/g' \
     |sed 's/--cpus-per-task=.*/--cpus-per-task='$((2*$nthreadsperprocess))'/g' \
     |sed 's/-t=[0-9]\+/-t='$nthreadsperprocess'/g' \
+    |sed 's/srun -n $SLURM_NTASKS/'"$(cat sbatch/templates/mpi_command.txt)"'/g' \
     > sbatch/$(basename $f)
     echo "Generated sbatch/$(basename $f)"
 done

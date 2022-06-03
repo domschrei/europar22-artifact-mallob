@@ -1,7 +1,7 @@
 
 # 1.1 Prerequisites
 
-sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils build-essential cmake wget gdb gawk
+sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils build-essential cmake wget gdb gawk bc
 
 # 1.2 Building Mallob
 
@@ -21,7 +21,7 @@ RDMAV_FORK_SAFE=1 mpirun -np 4 build/mallob -T=60 -mono=instances/r3unknown_100k
 
 # 1.5 On Producing Plots
 
-sudo apt install python3-matplotlib
+sudo apt install python3-matplotlib dvipng
 
 # 2.1 Original Setup
 

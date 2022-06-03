@@ -126,7 +126,7 @@ On an Ubuntu 20.04 system, the following packages with their dependencies are su
 
 \begin{ttfenv}
 sudo apt install git cmake zlib1g-dev libopenmpi-dev unzip xz-utils \CR\\
-\hspace*{0.3cm}build-essential cmake wget gdb gawk
+\hspace*{0.3cm}build-essential cmake wget gdb gawk bc
 \end{ttfenv}
 
 
@@ -196,10 +196,10 @@ You can compare the output with the sample output we provide in \texttt{sample-o
 
 We use PyPlot / Matplotlib for outputting plots from experiments.
 In order to produce plots from our experiments via the scripts we provide, you require Python 3 and a functional Matplotlib installation.
-It should suffice to install the following package with its required dependencies:
+It should suffice to install the following packages with required dependencies:
 
 \begin{ttfenv}
-sudo apt install python3-matplotlib
+sudo apt install python3-matplotlib dvipng
 \end{ttfenv}
 
 As compute servers oftentimes do not have access to the graphical packages which Matplotlib requires, we facilitate the process of extracting data from the large run logs on the compute server and then transferring the data to a computer with a graphical environment in order to plot them.
@@ -280,8 +280,10 @@ Our \texttt{sbatch} scripts load the environment modules listed above, create lo
 \begin{ttfenv}
 RDMAV\_FORK\_SAFE=1 \textbf{srun} -n \$SLURM\_NTASKS build/mallob \$options
 \end{ttfenv}
+You can modify the MPI command (\texttt{srun -n \$SLURM\_NTASKS} in this case) by editing\\
+\texttt{sbatch/templates/mpi\_command.txt} accordingly \textbf{before} instantiating the sbatch files.
 
-Depending on the particular system available to you, \textbf{it is likely that you need to modify or extend the \texttt{sbatch} files}.
+Depending on the particular system available to you, \textbf{it is possible that you need to make further changes to the \texttt{sbatch} files}.
 For instance, you may need to specify a user name or a certain partition of the cluster to run the job on.
 As we are unable to account for all possible cluster configurations, please consult the documentation for your particular compute cluster to find which exact SLURM configuration is required for hybrid (MPI + multithreading) programs.
 
