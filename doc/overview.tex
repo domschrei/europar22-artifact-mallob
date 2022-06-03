@@ -649,19 +649,20 @@ Please compare your output to the sample output we provide in \texttt{sample-out
 
 \section{Troubleshooting}
 
-\subsection{Known Issues}
+The version of Mallob included in this artifact is essentially the version our originals experiments were run with, but with a few backports from our current version of Mallob to fix some bugs and errors.\footnote{We do not expect these changes to have any noticeable impact on the reported performance.}
+In the following, we provide some notes on troubleshooting our software. 
 
-During the experiments you may encounter errors being reported.
-There are two known issues with the provided version of Mallob:
-\begin{itemize}
- \item Due to a race condition, an internal assumption may fail in the solver process, which leads to this process aborting. As we have included some degree of fault-tolerance on this level, the solver process will be restarted and the scheduling of the system is not affected. This error occurs rarely (approximately once every 1\,000--10\,000 core-h), hence the impact on response times is negligible.
- \item A memory error may occur during the transfer of a large job description. This may lead to the job description being corrupted. The solver process recognizes this inconsistency and crashes. Unfortunately, as there is no fallback protocol for corrupted job descriptions, the solver process will crash repeatedly as attempts are made to restart it.
- In our experience, this error occurs very rarely (approximately once every 10\,000 core-h) which also renders the error negligible.
-\end{itemize}
-These errors have been fixed in more recent versions of Mallob.
-However, as the fixes for these problems are non-trivial and change (improve) the performance of our system, we decided to rather provide the exact version of Mallob our experiments were conducted with.
-Errors in Mallob generate files \texttt{mallob\_thread\_trace\_*} in the base directory.
-As long as a run finishes successfully, these files can be removed afterwards; however, they may provide some insights if an unexpected error occurs.
+\subsection{Run-Time Errors}
+
+There is one known issue with the provided version of Mallob:
+Due to a race condition, an internal assumption may fail in the solver process, which leads to this process aborting. As we have included some degree of fault-tolerance on this level, the solver process will be restarted and the scheduling of the system is not affected. This error occurs rarely (approximately once every 1\,000--10\,000 core-h), hence the impact on response times is negligible.
+The error has been fixed in more recent versions of Mallob, but as our fix changes (improves) the performance of our system, we decided to rather provide the version of Mallob our experiments were conducted with.
+
+In general, run-time errors in Mallob generate files \texttt{mallob\_thread\_trace\_*} in the base directory.
+As long as a run finishes successfully, these files can be removed afterwards; however, they may provide some insights if an unexpected error occured and the entire program crashed.
+In such a case, please determine whether the error occurs consistently for each run or whether a repetition of the experiment runs without errors.
+(E.g., a node failure in an HPC system can lead to such a one-time error.)
+If the error occurs consistently, please try to get in touch with us (see Section 4).
 
 \subsection{Performance Problems}
 
@@ -687,8 +688,20 @@ The only exception here is $c=32$ where both hardware threads are fully utilized
 
 Our software named Mallob can be accessed at \url{https://github.com/domschrei/mallob}.
 Please see the license information provided there for using the different modules of Mallob.
-If any questions about the evaluation process arise, please contact \texttt{dominik.schreiber@kit.edu}.
-In case this address is not active any longer, please try \texttt{mail@dominikschreiber.de}.
+If any questions arise, please contact \texttt{dominik.schreiber@kit.edu}.
+In case this address is inactive, please try \texttt{mail@dominikschreiber.de}.
+You can also submit an issue on the Github page linked above.
+
+\subsection*{Acknowledgments}
+
+\begin{wrapfigure}[5]{r}{0.25\textwidth}
+  \vspace{-0.4cm}
+  \centering
+  \includegraphics[width=\textwidth]{logo_erc_eu_tight.jpg}
+\end{wrapfigure}
+
+This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (grant agreement No. 882500).
+The authors gratefully acknowledge the Gauss Centre for Supercomputing e.V. (www.gauss-centre.eu) for funding this project by providing computing time on the GCS Supercomputer SuperMUC-NG at Leibniz Supercomputing Centre (www.lrz.de).
 
 % sbatch/mallob_satscheduler.sh
 
