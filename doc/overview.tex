@@ -245,13 +245,13 @@ However, we provide downloadable ZIP files for selected log files (rank 0 + all 
 \label{sec:original-setup}
 
 For documentation purposes, we describe the exact setup we have used for our experiments.
-We used up to 128 ``thin'' compute nodes of SuperMUC-ng\footnote{\url{https://doku.lrz.de/display/PUBLIC/Hardware+of+SuperMUC-NG}}.
+We used up to 128 ``thin'' compute nodes of SuperMUC-NG\footnote{\url{https://doku.lrz.de/display/PUBLIC/Hardware+of+SuperMUC-NG}}.
 Each node consists of two Intel Xeon Platinum 8174 processors with 24 physical cores (48 hardware threads) each.
 Each node features a total of 96\,GB of RAM.
-To quote the official documentation of SuperMUC-ng: ``\textit{The internal interconnect is a fast OmniPath network with 100 Gbit/s.
+To quote the official documentation of SuperMUC-NG: ``\textit{The internal interconnect is a fast OmniPath network with 100 Gbit/s.
 The compute nodes are bundled into 8 domains (islands). Within one island, the OmniPath network topology is a `fat tree' for highly efficient communication. The OmniPath connection between the islands is pruned (pruning factor 1:4).}''\footnote{\url{https://doku.lrz.de/display/PUBLIC/SuperMUC-NG}}
 
-In addition to the base installation on SuperMUC-ng, we have loaded the following modules (for building as well as execution):
+In addition to the base installation on SuperMUC-NG, we have loaded the following modules (for building as well as execution):
 {
 \begin{verbatim}
 1) admin/1.0     5) intel/19.0.5      9) gcc/9.3.0           
@@ -261,11 +261,11 @@ In addition to the base installation on SuperMUC-ng, we have loaded the followin
 \end{verbatim}
 }
 
-SuperMUC-ng runs the SLURM workload manager, which is a centralized scheduling system.
+SuperMUC-NG runs the SLURM workload manager, which is a centralized scheduling system.
 Jobs in SLURM are described via a script file with special \textit{SLURM directives} which describe the kind of deployment, the scale, maximum processing time, and other meta data.
 Jobs are then submitted to SLURM via the command \texttt{sbatch \$file}.
 Each of our runs of Mallob is deployed as one particular SLURM job: In \texttt{sbatch/} we provide SLURM script files equivalent to the ones we have used to submit our runs, and we also provide automation to instantiate these SLURM scripts for a differing number of nodes, processes per node, or worker threads per process.
-The SLURM directives for our experiments on SuperMUC-ng look like this:
+The SLURM directives for our experiments on SuperMUC-NG look like this:
 \begin{ttfenv}
 \#SBATCH -t 00:06:00\\
 \#SBATCH -{}-nodes=128\\
