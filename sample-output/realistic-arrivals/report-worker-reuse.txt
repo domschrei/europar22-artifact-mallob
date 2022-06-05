@@ -1,4 +1,4 @@
-Approach  CCR_med  CCR_max  CCR_tot  CS_med  CS_mean  num_processed  RT_mean  Pr[WC<=1]  Pr[WC<=2]  Pr[WC<=5]  Pr[WC<=10]  Pr[WC<=25]
+Approach  WCR_med  WCR_max  WCR_tot  CS_med  CS_mean  num_processed  RT_mean  Pr[WC<=1]  Pr[WC<=2]  Pr[WC<=5]  Pr[WC<=10]  Pr[WC<=25]
 "None"    1.2      2.33333  1.29088  90      90.75    123            27.3114  0.930275   0.981651   1          1           1
 "Basic"   1.23077  2.25     1.30216  90      91.75    123            27.6792  0.940801   0.982696   1          1           1
 "Ours"    1.06667  2        1.184    84      86.375   125            27.0828  0.964928   0.992806   1          1           1

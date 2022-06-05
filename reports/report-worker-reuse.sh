@@ -10,7 +10,7 @@ fi
 cdf_eval_points="0 1 4 9 24"
 
 # Output header line
-echo -ne "Approach CCR_med CCR_max CCR_tot CS_med CS_mean num_processed RT_mean "
+echo -ne "Approach WCR_med WCR_max WCR_tot CS_med CS_mean num_processed RT_mean "
 # Ourput CDF description at different points
 for i in $cdf_eval_points; do echo -ne "Pr[WC<=$(($i+1))] "; done
 # Line break

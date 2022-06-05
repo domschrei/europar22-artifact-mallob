@@ -2,7 +2,7 @@
 % LLNCS macro package for Springer Computer Science proceedings;
 % Version 2.20 of 2018/03/10
 %
-\documentclass[runningheads]{article}
+\documentclass{article}
 
 \usepackage[margin=3cm]{geometry}
 \usepackage[T1]{fontenc}
@@ -593,7 +593,7 @@ And last but not least, to reproduce Table~2 from our paper, execute:
  bash reports/report-worker-reuse.sh logs/realistic-{7,8,1}
 \end{verbatim}
 Run 1 (``Ours'') should generally lead to the best performance, although the margin in terms of mean reponse times and processed jobs may be small or non-existent.
-An improvement in terms of Context Creation Ratio (CCR) and context switches (CS) should be noticeable.
+An improvement in terms of Worker Creation Ratio (WCR) and context switches (CS) should be noticeable.
 The final five values should be monotonically increasing and the final value should be very close to 1 for each run.
 
 \subsubsection{Short / Small Setup}
@@ -643,8 +643,8 @@ Please compare your output to the sample output we provide in \texttt{sample-out
  \item You should be able to observe consistent reasonably high utilization ($\approx 99\%$) at least for run 2.
  The relatively higher fluctuation on this small scale leads to lower utilization on average due to frequent re-scheduling, and, especially for low arrival rates, may lead to time intervals where not all PEs can be employed (see Section~\ref{sec:realistic-original}).
  \item The latencies reported by the respective plots for run 1 should be similarly low as in our distributed setup or lower.
- \item In terms of worker reuse, you should be able to discern improvements in terms of CCR and CS for our approach over the other two approaches.
- The absolute values for CCR and CS should be lower (since a single job experiences less relative rescheduling than in a large system) whereas we expect the values for Pr[$\cdot$] to increase more quickly than in our paper -- in our own small scale experiments, no worker was rescheduled five or more times.
+ \item In terms of worker reuse, you should be able to discern improvements in terms of WCR and CS for our approach over the other two approaches.
+ The absolute values for WCR and CS should be lower (since a single job experiences less relative rescheduling than in a large system) whereas we expect the values for Pr[$\cdot$] to increase more quickly than in our paper -- in our own small scale experiments, no worker was rescheduled five or more times.
 \end{itemize}
 
 \section{Troubleshooting}
